@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import "./App.css";
 import backgroundImage from "./assets/background.jpg";
+import Sevens from "./sevens/Sevens";
 
 const games = [
   {
@@ -13,15 +15,33 @@ const games = [
 ];
 
 function App() {
-  const openGame = (game) => {
-    if (!game.available) return;
+  const [currentPath, setCurrentPath] = useState(
+    window.location.pathname,
+  );
 
-    window.location.href = game.path;
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  const navigate = (path) => {
+    window.history.pushState({}, "", path);
+    setCurrentPath(path);
   };
+
+  if (currentPath === "/sevens") {
+    return <Sevens navigate={navigate} />;
+  }
 
   return (
     <main className="hub">
-      {/* 背景画像 */}
       <div
         className="background"
         style={{
@@ -29,10 +49,8 @@ function App() {
         }}
       />
 
-      {/* 暗くするオーバーレイ */}
       <div className="overlay" />
 
-      {/* メインコンテンツ */}
       <div className="container">
         <header className="header">
           <p className="subTitle">WELCOME</p>
@@ -44,7 +62,6 @@ function App() {
           </h1>
 
           <div className="line" />
-
         </header>
 
         <section className="gameList">
@@ -53,7 +70,7 @@ function App() {
               key={game.id}
               type="button"
               className="gameButton"
-              onClick={() => openGame(game)}
+              onClick={() => navigate(game.path)}
               disabled={!game.available}
             >
               <div className="left">
