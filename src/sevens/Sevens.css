@@ -1,17 +1,45 @@
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(49, 82, 74, 0.96),
+      rgba(12, 26, 28, 0.99)
+    );
+}
+
 * {
   box-sizing: border-box;
 }
 
 .sevensPage {
-  --usable-height: calc(100vh - 120px);
-
+  /*
+    The entire Sevens screen is one fixed-ratio canvas.
+    Its width is limited by:
+    1. the 1500px design maximum,
+    2. the available viewport width,
+    3. the available viewport height converted through the 1.46 ratio.
+  */
+  --game-aspect: 1.46;
   --game-width: min(
     1500px,
-    calc(var(--usable-height) * 1.46)
+    calc(100vw - 32px),
+    calc((100svh - 32px) * var(--game-aspect))
   );
 
-  min-height: 100svh;
-  padding: 16px;
+  width: var(--game-width);
+  aspect-ratio: 1.46 / 1;
+  min-height: 0;
+  margin: 16px auto;
+  padding: 1.067cqw;
+
+  display: flex;
+  flex-direction: column;
+
+  container-type: inline-size;
 
   color: #fff;
 
@@ -26,8 +54,9 @@
 }
 
 .sevensHeader {
-  width: min(1500px, 100%);
-  margin: 0 auto clamp(8px, 1.333vw, 20px);
+  width: 100%;
+  flex: 0 0 auto;
+  margin: 0 auto clamp(8px, 1.333cqw, 20px);
 
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -41,40 +70,40 @@
 .sevensTitle span {
   color: rgba(255, 255, 255, 0.65);
 
-  font-size: clamp(7px, 0.733vw, 11px);
-  letter-spacing: clamp(2px, 0.267vw, 4px);
+  font-size: clamp(7px, 0.733cqw, 11px);
+  letter-spacing: clamp(2px, 0.267cqw, 4px);
 }
 
 .sevensTitle h1 {
-  margin: clamp(1px, 0.133vw, 2px) 0 0;
+  margin: clamp(1px, 0.133cqw, 2px) 0 0;
 
   font-family: "Cormorant Garamond", serif;
-  font-size: clamp(26px, 2.933vw, 44px);
+  font-size: clamp(26px, 2.933cqw, 44px);
   font-weight: 500;
-  letter-spacing: clamp(2px, 0.333vw, 5px);
+  letter-spacing: clamp(2px, 0.333cqw, 5px);
 }
 
 .sevensTitle p {
   margin: 0;
   color: #e4cb86;
 
-  font-size: clamp(11px, 1.067vw, 16px);
+  font-size: clamp(11px, 1.067cqw, 16px);
 }
 
 .backButton,
 .restartButton {
   width: fit-content;
   padding:
-    clamp(6px, 0.667vw, 10px)
-    clamp(10px, 1.2vw, 18px);
+    clamp(6px, 0.667cqw, 10px)
+    clamp(10px, 1.2cqw, 18px);
 
-  border: clamp(1px, 0.067vw, 1px) solid rgba(227, 200, 127, 0.7);
-  border-radius: clamp(6px, 0.667vw, 10px);
+  border: clamp(1px, 0.067cqw, 1px) solid rgba(227, 200, 127, 0.7);
+  border-radius: clamp(6px, 0.667cqw, 10px);
 
   color: #f4e3b0;
   background: rgba(10, 18, 20, 0.7);
 
-  font-size: clamp(11px, 1.067vw, 16px);
+  font-size: clamp(11px, 1.067cqw, 16px);
 
   cursor: pointer;
 
@@ -96,22 +125,18 @@
 .sevensTable {
   position: relative;
 
-  width: min(
-    1500px,
-    100%,
-    calc((100svh - 120px) * 1.46)
-  );
-
+  width: 100%;
   min-height: 0;
+  flex: 1 1 auto;
 
   margin: 0 auto;
   padding:
-    clamp(44px, 5vw, 75px)
-    clamp(22px, 7.333vw, 110px)
-    clamp(10px, 1.2vw, 18px);
+    clamp(44px, 5cqw, 75px)
+    clamp(22px, 7.333cqw, 110px)
+    clamp(10px, 1.2cqw, 18px);
 
-  border: clamp(1px, 0.133vw, 2px) solid rgba(216, 186, 106, 0.8);
-  border-radius: clamp(20px, 2.667vw, 40px);
+  border: clamp(1px, 0.133cqw, 2px) solid rgba(216, 186, 106, 0.8);
+  border-radius: clamp(20px, 2.667cqw, 40px);
 
   background:
     linear-gradient(
@@ -120,21 +145,21 @@
     );
 
   box-shadow:
-    inset 0 0 clamp(24px, 4vw, 60px) rgba(0, 0, 0, 0.45),
-    0 clamp(8px, 1.333vw, 20px)
-      clamp(20px, 3.333vw, 50px)
+    inset 0 0 clamp(24px, 4cqw, 60px) rgba(0, 0, 0, 0.45),
+    0 clamp(8px, 1.333cqw, 20px)
+      clamp(20px, 3.333cqw, 50px)
       rgba(0, 0, 0, 0.35);
 }
 
 .opponentsTopRow {
   position: absolute;
-  top: clamp(7px, 0.933vw, 14px);
+  top: clamp(7px, 0.933cqw, 14px);
   left: 50%;
 
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: clamp(6px, 1.067vw, 16px);
+  gap: clamp(6px, 1.067cqw, 16px);
 
   transform: translateX(-50%);
 }
@@ -143,11 +168,11 @@
   position: static;
 
   padding:
-    clamp(5px, 0.667vw, 10px)
-    clamp(8px, 1.067vw, 16px);
+    clamp(5px, 0.667cqw, 10px)
+    clamp(8px, 1.067cqw, 16px);
 
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: clamp(6px, 0.8vw, 12px);
+  border-radius: clamp(6px, 0.8cqw, 12px);
 
   background: rgba(0, 0, 0, 0.32);
 
@@ -157,33 +182,33 @@
 .opponent p {
   margin: 0;
 
-  font-size: clamp(10px, 1.067vw, 16px);
+  font-size: clamp(10px, 1.067cqw, 16px);
   font-weight: 700;
-  letter-spacing: clamp(1px, 0.133vw, 2px);
+  letter-spacing: clamp(1px, 0.133cqw, 2px);
 }
 
 .opponent span {
   color: rgba(255, 255, 255, 0.7);
-  font-size: clamp(8px, 0.8vw, 12px);
+  font-size: clamp(8px, 0.8cqw, 12px);
 }
 
 .board {
   display: flex;
   flex-direction: column;
-  gap: clamp(3px, 0.4vw, 6px);
+  gap: clamp(3px, 0.4cqw, 6px);
 }
 
 .boardRow {
   display: grid;
   grid-template-columns:
-    clamp(20px, 2.4vw, 36px)
+    clamp(20px, 2.4cqw, 36px)
     1fr;
-  gap: clamp(2px, 0.533vw, 8px);
+  gap: clamp(2px, 0.533cqw, 8px);
   align-items: center;
 }
 
 .boardSuit {
-  font-size: clamp(18px, 1.867vw, 28px);
+  font-size: clamp(18px, 1.867cqw, 28px);
   text-align: center;
 }
 
@@ -200,11 +225,11 @@
   grid-template-columns: repeat(
     13,
     minmax(
-      clamp(28px, 2.533vw, 38px),
+      clamp(28px, 2.533cqw, 38px),
       1fr
     )
   );
-  gap: clamp(2px, 0.333vw, 5px);
+  gap: clamp(2px, 0.333cqw, 5px);
 }
 
 .sevensCard,
@@ -212,27 +237,27 @@
   width: 100%;
   aspect-ratio: 2 / 3;
 
-  border-radius: clamp(3px, 0.333vw, 5px);
+  border-radius: clamp(3px, 0.333cqw, 5px);
 }
 
 .playableEmptySlot {
-  border: clamp(1px, 0.133vw, 2px) solid #f4d36f;
+  border: clamp(1px, 0.133cqw, 2px) solid #f4d36f;
   color: #fff4bd;
   background: rgba(242, 208, 107, 0.08);
 
-  font-size: clamp(13px, 1.467vw, 22px);
+  font-size: clamp(13px, 1.467cqw, 22px);
   font-weight: 900;
 
   -webkit-text-stroke:
-    clamp(0.35px, 0.047vw, 0.7px)
+    clamp(0.35px, 0.047cqw, 0.7px)
     #9a6f00;
 
   text-shadow: none;
 
   box-shadow:
-    inset 0 0 clamp(2px, 0.267vw, 4px)
+    inset 0 0 clamp(2px, 0.267cqw, 4px)
       rgba(255, 245, 190, 0.55),
-    inset 0 0 clamp(5px, 0.667vw, 10px)
+    inset 0 0 clamp(5px, 0.667cqw, 10px)
       rgba(255, 210, 70, 0.35);
 
   animation: playableSlotGlow 1.8s ease-in-out infinite;
@@ -275,17 +300,17 @@
   justify-content: center;
   align-items: center;
 
-  font-size: clamp(13px, 1.467vw, 22px);
+  font-size: clamp(13px, 1.467cqw, 22px);
   font-weight: 900;
 
   color: rgba(255, 255, 255, 0.75);
 
   border:
-    clamp(1px, 0.133vw, 2px)
+    clamp(1px, 0.133cqw, 2px)
     dashed
     rgba(255, 255, 255, 0.18);
 
-  border-radius: clamp(4px, 0.533vw, 8px);
+  border-radius: clamp(4px, 0.533cqw, 8px);
 
   user-select: none;
 }
@@ -296,8 +321,8 @@
   width: 100%;
   height: 100%;
 
-  border: clamp(1px, 0.133vw, 2px) solid #d3d3d3;
-  border-radius: clamp(3px, 0.333vw, 5px);
+  border: clamp(1px, 0.133cqw, 2px) solid #d3d3d3;
+  border-radius: clamp(3px, 0.333cqw, 5px);
 
   background: #fff;
 }
@@ -323,14 +348,14 @@
 }
 
 .fallbackCorner span {
-  font-size: clamp(8px, 1.3vw, 18px);
+  font-size: clamp(8px, 1.3cqw, 18px);
   font-weight: 700;
 }
 
 .fallbackCorner strong {
-  margin-top: clamp(1px, 0.133vw, 2px);
+  margin-top: clamp(1px, 0.133cqw, 2px);
 
-  font-size: clamp(8px, 1.3vw, 18px);
+  font-size: clamp(8px, 1.3cqw, 18px);
 }
 
 .fallbackCenter {
@@ -340,7 +365,7 @@
 
   transform: translate(-50%, -50%);
 
-  font-size: clamp(18px, 3vw, 44px);
+  font-size: clamp(18px, 3cqw, 44px);
 }
 
 .fallbackBottom {
@@ -353,17 +378,17 @@
 }
 
 .playerArea {
-  --hand-card-width: clamp(144px, 14.667vw, 220px);
+  --hand-card-width: clamp(144px, 14.667cqw, 220px);
 
   position: static;
 
   width: 100%;
-  margin: clamp(12px, 1.467vw, 22px) auto 0;
+  margin: clamp(12px, 1.467cqw, 22px) auto 0;
 
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
-  gap: clamp(12px, 1.333vw, 20px);
+  gap: clamp(12px, 1.333cqw, 20px);
 
   transform: none;
 }
@@ -463,23 +488,23 @@
 }
 
 .playerHand .sevensCard:hover {
-  transform: translateY(clamp(-18px, -1.2vw, -10px));
+  transform: translateY(clamp(-18px, -1.2cqw, -10px));
 }
 
 .playerHand .playableCard {
   filter:
     brightness(1.08)
     drop-shadow(
-      0 0 clamp(6px, 0.8vw, 12px)
+      0 0 clamp(6px, 0.8cqw, 12px)
       rgba(255, 220, 115, 0.8)
     );
 }
 
 .playerHand .selectedCard {
-  transform: translateY(clamp(-36px, -2.4vw, -20px));
+  transform: translateY(clamp(-36px, -2.4cqw, -20px));
 
-  outline: clamp(2px, 0.267vw, 4px) solid #f0cb69;
-  outline-offset: clamp(1px, 0.2vw, 3px);
+  outline: clamp(2px, 0.267cqw, 4px) solid #f0cb69;
+  outline-offset: clamp(1px, 0.2cqw, 3px);
 }
 
 .actionButtons {
@@ -488,20 +513,20 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: clamp(8px, 0.8vw, 12px);
+  gap: clamp(8px, 0.8cqw, 12px);
 }
 
 .actionButtons button {
-  width: clamp(126px, 10.667vw, 160px);
+  width: clamp(126px, 10.667cqw, 160px);
   min-width: 0;
 
   padding:
-    clamp(9px, 0.8vw, 12px)
-    clamp(10px, 1.067vw, 16px);
+    clamp(9px, 0.8cqw, 12px)
+    clamp(10px, 1.067cqw, 16px);
 
-  border-radius: clamp(6px, 0.667vw, 10px);
+  border-radius: clamp(6px, 0.667cqw, 10px);
 
-  font-size: clamp(11px, 1.067vw, 16px);
+  font-size: clamp(11px, 1.067cqw, 16px);
   white-space: nowrap;
 
   cursor: pointer;
@@ -543,7 +568,7 @@
     grid-column: 1 / -1;
     grid-row: 1;
 
-    margin-bottom: clamp(6px, 1.714vw, 12px);
+    margin-bottom: clamp(6px, 1.714cqw, 12px);
   }
 
   .backButton {
@@ -557,9 +582,9 @@
   }
 
   .sevensTable {
-    padding-right: clamp(8px, 2.857vw, 20px);
-    padding-left: clamp(8px, 2.857vw, 20px);
-    border-radius: clamp(18px, 3.429vw, 24px);
+    padding-right: clamp(8px, 2.857cqw, 20px);
+    padding-left: clamp(8px, 2.857cqw, 20px);
+    border-radius: clamp(18px, 3.429cqw, 24px);
   }
 
   .opponentsTopRow {
@@ -587,7 +612,7 @@
   }
 
   .playerArea {
-    --hand-card-width: clamp(96px, 24vw, 144px);
+    --hand-card-width: clamp(96px, 24cqw, 144px);
 
     width: 100%;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -603,9 +628,9 @@
   }
 
   .actionButtons button {
-    width: clamp(82px, 22vw, 110px);
+    width: clamp(82px, 22cqw, 110px);
     padding: 7px 5px;
-    font-size: clamp(9px, 2.4vw, 12px);
+    font-size: clamp(9px, 2.4cqw, 12px);
   }
 }
 
