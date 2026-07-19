@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap");
 
 * {
   margin: 0;
@@ -6,220 +6,251 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+  background: #000;
+}
+
 body {
   font-family: "Noto Sans JP", sans-serif;
-  background: #111;
+  color: #fff;
+  background: #000;
   overflow-x: hidden;
+}
+
+button {
+  font: inherit;
 }
 
 .hub {
   position: relative;
+  isolation: isolate;
+
   min-height: 100vh;
+
   display: flex;
   justify-content: center;
   align-items: center;
+
+  overflow: hidden;
+  background: #000;
 }
 
+/* 背景画像自体はApp.jsxで指定 */
 .background {
   position: fixed;
   inset: 0;
 
-  background:
-    url("./assets/background.jpg") center center /
-    cover no-repeat;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
 
-  z-index: -2;
+  z-index: 0;
 }
 
+/* 背景を暗くする幕 */
 .overlay {
   position: fixed;
   inset: 0;
 
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.45);
 
-  z-index: -1;
+  z-index: 1;
+  pointer-events: none;
 }
 
+/* 中央のパネル */
 .container {
-  width: min(92%, 700px);
+  position: relative;
+  z-index: 2;
 
+  width: min(92%, 700px);
   padding: 50px;
 
   border-radius: 28px;
 
-  background: rgba(255,255,255,0.08);
+  background: rgba(10, 10, 14, 0.42);
 
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 
-  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
 
   text-align: center;
 }
 
-.subTitle{
-  color:#d8c48b;
+.subTitle {
+  margin-bottom: 10px;
 
-  letter-spacing:5px;
+  color: #d8c48b;
 
-  font-size:13px;
+  font-size: 13px;
+  font-weight: 400;
 
-  margin-bottom:10px;
+  letter-spacing: 5px;
 }
 
 .title {
+  color: #fff;
+
   font-family: "Cormorant Garamond", serif;
-  font-weight: 500;
-  color: white;
   font-size: 68px;
+  font-weight: 500;
+
   line-height: 0.95;
   letter-spacing: 2px;
 }
 
-.line{
-  width:140px;
+.line {
+  width: 140px;
+  height: 2px;
 
-  height:2px;
+  margin: 28px auto;
 
-  margin:28px auto;
-
-  background:#d8c48b;
+  background: #d8c48b;
 }
 
-.description{
-  color:#ddd;
+.description {
+  margin-bottom: 40px;
 
-  margin-bottom:40px;
+  color: #ddd;
 
-  font-size:18px;
+  font-size: 18px;
+  font-weight: 400;
 }
 
-.gameList{
-  display:flex;
-
-  flex-direction:column;
-
-  gap:20px;
+.gameList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.gameButton{
-  display:flex;
+.gameButton {
+  width: 100%;
+  padding: 22px 28px;
 
-  justify-content:space-between;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
-  align-items:center;
+  border: none;
+  border-radius: 18px;
 
-  width:100%;
+  background: rgba(15, 15, 20, 0.58);
+  color: #fff;
 
-  padding:22px 28px;
+  cursor: pointer;
 
-  border:none;
-
-  border-radius:18px;
-
-  cursor:pointer;
-
-  background:rgba(255,255,255,.10);
-
-  color:white;
-
-  transition:.25s;
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
-.gameButton:hover{
+.gameButton:hover {
+  transform: translateY(-3px) scale(1.02);
 
-  transform:translateY(-3px) scale(1.02);
+  background: rgba(30, 30, 38, 0.72);
 
-  background:rgba(255,255,255,.18);
-
-  box-shadow:0 10px 30px rgba(0,0,0,.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
-.left{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:20px;
-
-  text-align:left;
+.gameButton:disabled {
+  cursor: default;
+  opacity: 0.55;
 }
 
-.suit{
+.left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 
-  font-size:40px;
+  text-align: left;
+}
 
-  color:#e8c46b;
+.suit {
+  color: #e8c46b;
+  font-size: 40px;
 }
 
 .english {
   font-family: "Cormorant Garamond", serif;
-  font-weight: 500;
   font-size: 36px;
+  font-weight: 500;
+
   letter-spacing: 1px;
 }
 
-.japanese{
+.japanese {
+  margin-top: 2px;
 
-  margin-top:2px;
-
-  font-size:18px;
+  font-size: 18px;
+  font-weight: 400;
 }
 
-.gameDescription{
+.gameDescription {
+  margin-top: 6px;
 
-  margin-top:6px;
+  color: #ccc;
 
-  color:#cccccc;
-
-  font-size:14px;
+  font-size: 14px;
+  font-weight: 400;
 }
 
-.play{
+.play {
+  color: #f0d98b;
 
-  color:#f0d98b;
+  font-weight: 500;
 
-  font-weight:bold;
-
-  letter-spacing:2px;
+  letter-spacing: 2px;
 }
 
-.footer{
+.footer {
+  margin-top: 45px;
 
-  margin-top:45px;
+  color: #bbb;
 
-  color:#bbbbbb;
+  font-size: 13px;
+  font-weight: 400;
 
-  font-size:13px;
-
-  letter-spacing:2px;
+  letter-spacing: 2px;
 }
 
-@media (max-width:700px){
-
-  .container{
-
-    padding:30px 22px;
+@media (max-width: 700px) {
+  .background {
+    /*
+      横長画像なので、スマホでは右側のキャラを
+      少し残す位置に調整
+    */
+    background-position: 65% center;
   }
 
-  .title{
-
-    font-size:38px;
+  .container {
+    width: min(92%, 520px);
+    padding: 30px 22px;
   }
 
-  .gameButton{
-
-    flex-direction:column;
-
-    gap:15px;
+  .title {
+    font-size: 38px;
   }
 
-  .left{
+  .description {
+    margin-bottom: 28px;
+    font-size: 15px;
+  }
 
-    text-align:center;
+  .gameButton {
+    flex-direction: column;
+    gap: 15px;
+  }
 
-    flex-direction:column;
+  .left {
+    flex-direction: column;
+    text-align: center;
   }
 }

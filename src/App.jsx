@@ -1,4 +1,5 @@
 import "./App.css";
+import backgroundImage from "./assets/background.jpg";
 
 const games = [
   {
@@ -16,19 +17,23 @@ function App() {
   const openGame = (game) => {
     if (!game.available) return;
 
-    // 今後React Routerに変更予定
     window.location.href = game.path;
   };
 
   return (
     <main className="hub">
-      {/* 背景画像（CSSで設定予定） */}
-      <div className="background" />
+      {/* 背景画像 */}
+      <div
+        className="background"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+        }}
+      />
 
       {/* 暗くするオーバーレイ */}
       <div className="overlay" />
 
-      {/* コンテンツ */}
+      {/* メインコンテンツ */}
       <div className="container">
         <header className="header">
           <p className="subTitle">WELCOME</p>
@@ -50,8 +55,10 @@ function App() {
           {games.map((game) => (
             <button
               key={game.id}
+              type="button"
               className="gameButton"
               onClick={() => openGame(game)}
+              disabled={!game.available}
             >
               <div className="left">
                 <span className="suit">{game.suit}</span>
@@ -71,7 +78,9 @@ function App() {
                 </div>
               </div>
 
-              <div className="play">PLAY ▶</div>
+              <div className="play">
+                {game.available ? "PLAY ▶" : "COMING SOON"}
+              </div>
             </button>
           ))}
         </section>
