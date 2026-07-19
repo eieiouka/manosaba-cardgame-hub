@@ -37,23 +37,26 @@ body,
   font-family: "Noto Sans JP", sans-serif;
 }
 
-.sevensGameCanvas {
-  --game-aspect: 1.23;
-  --game-width: min(
-    1500px,
-    calc(100vw - 32px),
-    calc((100svh - 32px) * var(--game-aspect))
-  );
+.sevensGameFrame {
+  position: relative;
+  flex: 0 0 auto;
+}
 
-  width: var(--game-width);
-  aspect-ratio: 1.23 / 1;
+.sevensGameCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 1500px;
+  height: 1220px;
   min-width: 0;
   min-height: 0;
-  padding: 1.067cqw;
+  padding: 16px;
 
   display: flex;
   flex-direction: column;
 
+  transform-origin: top left;
   container-type: inline-size;
 }
 
@@ -387,7 +390,7 @@ body,
 }
 
 .playerArea {
-  --hand-card-width: clamp(144px, 14.667cqw, 220px);
+  --hand-card-width: 14.667cqw;
 
   position: static;
 
@@ -498,23 +501,23 @@ body,
 }
 
 .playerHand .sevensCard:hover {
-  transform: translateY(clamp(-18px, -1.2cqw, -10px));
+  transform: translateY(-1.2cqw);
 }
 
 .playerHand .playableCard {
   filter:
     brightness(1.08)
     drop-shadow(
-      0 0 clamp(6px, 0.8cqw, 12px)
+      0 0 0.8cqw
       rgba(255, 220, 115, 0.8)
     );
 }
 
 .playerHand .selectedCard {
-  transform: translateY(clamp(-36px, -2.4cqw, -20px));
+  transform: translateY(-2.4cqw);
 
-  outline: clamp(2px, 0.267cqw, 4px) solid #f0cb69;
-  outline-offset: clamp(1px, 0.2cqw, 3px);
+  outline: 0.267cqw solid #f0cb69;
+  outline-offset: 0.2cqw;
 }
 
 .actionButtons {
@@ -523,20 +526,20 @@ body,
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: clamp(8px, 0.8cqw, 12px);
+  gap: 0.8cqw;
 }
 
 .actionButtons button {
-  width: clamp(126px, 10.667cqw, 160px);
+  width: 10.667cqw;
   min-width: 0;
 
   padding:
-    clamp(9px, 0.8cqw, 12px)
-    clamp(10px, 1.067cqw, 16px);
+    0.8cqw
+    1.067cqw;
 
-  border-radius: clamp(6px, 0.667cqw, 10px);
+  border-radius: 0.667cqw;
 
-  font-size: clamp(11px, 1.067cqw, 16px);
+  font-size: 1.067cqw;
   white-space: nowrap;
 
   cursor: pointer;
@@ -547,7 +550,7 @@ body,
 }
 
 .actionButtons button:hover:not(:disabled) {
-  transform: translateY(-2px);
+  transform: translateY(-0.133cqw);
 }
 
 .actionButtons button:disabled {
@@ -567,81 +570,6 @@ body,
 
   color: #fff;
   background: rgba(0, 0, 0, 0.3);
-}
-
-@media (max-width: 700px) {
-  .sevensHeader {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .sevensTitle {
-    grid-column: 1 / -1;
-    grid-row: 1;
-
-    margin-bottom: clamp(6px, 1.714cqw, 12px);
-  }
-
-  .backButton {
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  .restartButton {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  .sevensTable {
-    padding-right: clamp(8px, 2.857cqw, 20px);
-    padding-left: clamp(8px, 2.857cqw, 20px);
-    border-radius: clamp(18px, 3.429cqw, 24px);
-  }
-
-  .opponentsTopRow {
-    width: calc(100% - 16px);
-    gap: 4px;
-  }
-
-  .opponent {
-    flex: 1;
-    min-width: 0;
-    padding: 5px 4px;
-  }
-
-  .opponent p {
-    letter-spacing: 0;
-  }
-
-  .boardRow {
-    grid-template-columns: 20px 1fr;
-    gap: 3px;
-  }
-
-  .boardCards {
-    gap: 2px;
-  }
-
-  .playerArea {
-    --hand-card-width: clamp(96px, 24cqw, 144px);
-
-    width: 100%;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 6px;
-  }
-
-  .playerHand {
-    width: 100%;
-  }
-
-  .actionButtons {
-    gap: 6px;
-  }
-
-  .actionButtons button {
-    width: clamp(82px, 22cqw, 110px);
-    padding: 7px 5px;
-    font-size: clamp(9px, 2.4cqw, 12px);
-  }
 }
 
 @keyframes playableSlotGlow {

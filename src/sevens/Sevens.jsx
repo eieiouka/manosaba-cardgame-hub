@@ -1,5 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./Sevens.css";
+
+const GAME_WIDTH = 1500;
+const GAME_HEIGHT = 1220;
+const PAGE_PADDING = 16;
 
 const suits = [
   {
@@ -170,6 +174,49 @@ function Sevens({ navigate }) {
   const [hand, setHand] = useState(initialHand);
   const [selectedCard, setSelectedCard] = useState(null);
   const [passes, setPasses] = useState(3);
+  const [gameScale, setGameScale] = useState(1);
+
+  useEffect(() => {
+    const updateGameScale = () => {
+      const viewportWidth =
+        window.visualViewport?.width ?? window.innerWidth;
+      const viewportHeight =
+        window.visualViewport?.height ?? window.innerHeight;
+
+      const availableWidth = Math.max(
+        viewportWidth - PAGE_PADDING * 2,
+        1,
+      );
+      const availableHeight = Math.max(
+        viewportHeight - PAGE_PADDING * 2,
+        1,
+      );
+
+      const nextScale = Math.min(
+        availableWidth / GAME_WIDTH,
+        availableHeight / GAME_HEIGHT,
+        1,
+      );
+
+      setGameScale(nextScale);
+    };
+
+    updateGameScale();
+
+    window.addEventListener("resize", updateGameScale);
+    window.visualViewport?.addEventListener(
+      "resize",
+      updateGameScale,
+    );
+
+    return () => {
+      window.removeEventListener("resize", updateGameScale);
+      window.visualViewport?.removeEventListener(
+        "resize",
+        updateGameScale,
+      );
+    };
+  }, []);
 
   const sortedHand = useMemo(() => {
     const suitOrder = {
@@ -246,7 +293,19 @@ function Sevens({ navigate }) {
 
   return (
     <main className="sevensPage">
-      <div className="sevensGameCanvas">
+      <div
+        className="sevensGameFrame"
+        style={{
+          width: GAME_WIDTH * gameScale,
+          height: GAME_HEIGHT * gameScale,
+        }}
+      >
+        <div
+          className="sevensGameCanvas"
+          style={{
+            transform: `scale(${gameScale})`,
+          }}
+        >
         <header className="sevensHeader">
           <button
             type="button"
@@ -397,6 +456,7 @@ function Sevens({ navigate }) {
             </div>
           </section>
         </section>
+        </div>
       </div>
     </main>
   );
