@@ -16,30 +16,14 @@ body,
 }
 
 .sevensPage {
-  /*
-    The entire Sevens screen is one fixed-ratio canvas.
-    Its width is limited by:
-    1. the 1500px design maximum,
-    2. the available viewport width,
-    3. the available viewport height converted through the 1.46 ratio.
-  */
-  --game-aspect: 1.46;
-  --game-width: min(
-    1500px,
-    calc(100vw - 32px),
-    calc((100svh - 32px) * var(--game-aspect))
-  );
-
-  width: var(--game-width);
-  aspect-ratio: 1.46 / 1;
-  min-height: 0;
-  margin: 16px auto;
-  padding: 1.067cqw;
+  min-height: 100svh;
+  padding: 16px;
 
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
-  container-type: inline-size;
+  overflow: auto;
 
   color: #fff;
 
@@ -51,6 +35,26 @@ body,
     );
 
   font-family: "Noto Sans JP", sans-serif;
+}
+
+.sevensGameCanvas {
+  --game-aspect: 1.23;
+  --game-width: min(
+    1500px,
+    calc(100vw - 32px),
+    calc((100svh - 32px) * var(--game-aspect))
+  );
+
+  width: var(--game-width);
+  aspect-ratio: 1.23 / 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 1.067cqw;
+
+  display: flex;
+  flex-direction: column;
+
+  container-type: inline-size;
 }
 
 .sevensHeader {
@@ -130,6 +134,9 @@ body,
   flex: 1 1 auto;
 
   margin: 0 auto;
+
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
   padding:
     clamp(44px, 5cqw, 75px)
     clamp(22px, 7.333cqw, 110px)
@@ -193,6 +200,8 @@ body,
 }
 
 .board {
+  min-height: 0;
+
   display: flex;
   flex-direction: column;
   gap: clamp(3px, 0.4cqw, 6px);
@@ -383,6 +392,7 @@ body,
   position: static;
 
   width: 100%;
+  min-height: 0;
   margin: clamp(12px, 1.467cqw, 22px) auto 0;
 
   display: grid;

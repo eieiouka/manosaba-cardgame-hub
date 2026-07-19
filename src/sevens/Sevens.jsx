@@ -67,9 +67,7 @@ function getCardImagePath(suitId, rank) {
     return "";
   }
 
-  const rankName = getRankFileName(rank);
-
-  return `/cards/card_${rankName}${suit.fileNumber}.png`;
+  return `/cards/card_${getRankFileName(rank)}${suit.fileNumber}.png`;
 }
 
 function getRankLabel(rank) {
@@ -104,7 +102,6 @@ function PlayingCard({
   style,
 }) {
   const [imageFailed, setImageFailed] = useState(false);
-
   const suitData = suits.find((item) => item.id === suit);
 
   const className = [
@@ -249,156 +246,158 @@ function Sevens({ navigate }) {
 
   return (
     <main className="sevensPage">
-      <header className="sevensHeader">
-        <button
-          type="button"
-          className="backButton"
-          onClick={() => navigate("/")}
-        >
-          ← HUBへ戻る
-        </button>
+      <div className="sevensGameCanvas">
+        <header className="sevensHeader">
+          <button
+            type="button"
+            className="backButton"
+            onClick={() => navigate("/")}
+          >
+            ← HUBへ戻る
+          </button>
 
-        <div className="sevensTitle">
-          <span>MANOSABA CARD GAMES</span>
-          <h1>SEVENS</h1>
-          <p>七並べ</p>
-        </div>
+          <div className="sevensTitle">
+            <span>MANOSABA CARD GAMES</span>
+            <h1>SEVENS</h1>
+            <p>七並べ</p>
+          </div>
 
-        <button
-          type="button"
-          className="restartButton"
-          onClick={restartGame}
-        >
-          やり直す
-        </button>
-      </header>
+          <button
+            type="button"
+            className="restartButton"
+            onClick={restartGame}
+          >
+            やり直す
+          </button>
+        </header>
 
-      <section className="sevensTable">
-        <section className="opponentsTopRow">
-          <section className="opponent">
-            <p>PLAYER 2</p>
-            <span>残り11枚</span>
+        <section className="sevensTable">
+          <section className="opponentsTopRow">
+            <section className="opponent">
+              <p>PLAYER 2</p>
+              <span>残り11枚</span>
+            </section>
+
+            <section className="opponent">
+              <p>PLAYER 3</p>
+              <span>残り10枚</span>
+            </section>
+
+            <section className="opponent">
+              <p>PLAYER 4</p>
+              <span>残り10枚</span>
+            </section>
           </section>
 
-          <section className="opponent">
-            <p>PLAYER 3</p>
-            <span>残り10枚</span>
-          </section>
+          <section className="board">
+            {suits.map((suit) => (
+              <div className="boardRow" key={suit.id}>
+                <div
+                  className={`boardSuit ${
+                    suit.id === "hearts" || suit.id === "diamonds"
+                      ? "redSuit"
+                      : "blackSuit"
+                  }`}
+                >
+                  {suit.symbol}
+                </div>
 
-          <section className="opponent">
-            <p>PLAYER 4</p>
-            <span>残り10枚</span>
-          </section>
-        </section>
+                <div className="boardCards">
+                  {Array.from({ length: 13 }, (_, index) => {
+                    const rank = index + 1;
+                    const played = board[suit.id].includes(rank);
 
-        <section className="board">
-          {suits.map((suit) => (
-            <div className="boardRow" key={suit.id}>
-              <div
-                className={`boardSuit ${
-                  suit.id === "hearts" || suit.id === "diamonds"
-                    ? "redSuit"
-                    : "blackSuit"
-                }`}
-              >
-                {suit.symbol}
-              </div>
+                    if (played) {
+                      return (
+                        <PlayingCard
+                          key={`${suit.id}-${rank}`}
+                          suit={suit.id}
+                          rank={rank}
+                          small
+                        />
+                      );
+                    }
 
-              <div className="boardCards">
-                {Array.from({ length: 13 }, (_, index) => {
-                  const rank = index + 1;
-                  const played = board[suit.id].includes(rank);
+                    const playableSlot = isPlayable(
+                      {
+                        suit: suit.id,
+                        rank,
+                      },
+                      board,
+                    );
 
-                  if (played) {
                     return (
-                      <PlayingCard
+                      <EmptyCardSlot
                         key={`${suit.id}-${rank}`}
-                        suit={suit.id}
                         rank={rank}
-                        small
+                        playable={playableSlot}
                       />
                     );
-                  }
+                  })}
+                </div>
+              </div>
+            ))}
+          </section>
 
-                  const playableSlot = isPlayable(
-                    {
-                      suit: suit.id,
-                      rank,
-                    },
-                    board,
-                  );
+          <section className="playerArea">
+            <div
+              className="playerHand"
+              data-count={sortedHand.length}
+            >
+              <div className="playerHandTrack">
+                {sortedHand.map((card, index) => {
+                  const playable = isPlayable(card, board);
+
+                  const selected =
+                    selectedCard?.suit === card.suit &&
+                    selectedCard?.rank === card.rank;
 
                   return (
-                    <EmptyCardSlot
-                      key={`${suit.id}-${rank}`}
-                      rank={rank}
-                      playable={playableSlot}
+                    <PlayingCard
+                      key={`${card.suit}-${card.rank}`}
+                      suit={card.suit}
+                      rank={card.rank}
+                      playable={playable}
+                      selected={selected}
+                      style={{
+                        "--hand-index": index,
+                        zIndex: index + 1,
+                      }}
+                      onClick={() => {
+                        if (selected) {
+                          playCard();
+                        } else {
+                          selectCard(card);
+                        }
+                      }}
                     />
                   );
                 })}
               </div>
             </div>
-          ))}
-        </section>
 
-        <section className="playerArea">
-          <div
-            className="playerHand"
-            data-count={sortedHand.length}
-          >
-            <div className="playerHandTrack">
-              {sortedHand.map((card, index) => {
-                const playable = isPlayable(card, board);
+            <div className="actionButtons">
+              <button
+                type="button"
+                className="playCardButton"
+                onClick={playCard}
+                disabled={!selectedCard}
+              >
+                カードを出す
+              </button>
 
-                const selected =
-                  selectedCard?.suit === card.suit &&
-                  selectedCard?.rank === card.rank;
-
-                return (
-                  <PlayingCard
-                    key={`${card.suit}-${card.rank}`}
-                    suit={card.suit}
-                    rank={card.rank}
-                    playable={playable}
-                    selected={selected}
-                    style={{
-                      "--hand-index": index,
-                      zIndex: index + 1,
-                    }}
-                    onClick={() => {
-                        if (selected) {
-                            playCard();
-                        } else {
-                            selectCard(card);
-                        }
-                    }}
-                  />
-                );
-              })}
+              <button
+                type="button"
+                className="passButton"
+                onClick={passTurn}
+                disabled={passes <= 0}
+              >
+                パス 残り{passes}回
+              </button>
             </div>
-          </div>
-
-          <div className="actionButtons">
-            <button
-              type="button"
-              className="playCardButton"
-              onClick={playCard}
-              disabled={!selectedCard}
-            >
-              カードを出す
-            </button>
-
-            <button
-              type="button"
-              className="passButton"
-              onClick={passTurn}
-              disabled={passes <= 0}
-            >
-              パス 残り{passes}回
-            </button>
-          </div>
+          </section>
         </section>
-      </section>
+      </div>
     </main>
   );
 }
