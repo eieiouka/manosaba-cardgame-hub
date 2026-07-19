@@ -140,13 +140,10 @@ body,
 
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  padding:
-    clamp(44px, 5cqw, 75px)
-    clamp(22px, 7.333cqw, 110px)
-    clamp(10px, 1.2cqw, 18px);
+  padding: 118px 88px 18px;
 
-  border: clamp(1px, 0.133cqw, 2px) solid rgba(216, 186, 106, 0.8);
-  border-radius: clamp(20px, 2.667cqw, 40px);
+  border: 2px solid rgba(216, 186, 106, 0.8);
+  border-radius: 40px;
 
   background:
     linear-gradient(
@@ -155,51 +152,86 @@ body,
     );
 
   box-shadow:
-    inset 0 0 clamp(24px, 4cqw, 60px) rgba(0, 0, 0, 0.45),
-    0 clamp(8px, 1.333cqw, 20px)
-      clamp(20px, 3.333cqw, 50px)
-      rgba(0, 0, 0, 0.35);
+    inset 0 0 60px rgba(0, 0, 0, 0.45),
+    0 20px 50px rgba(0, 0, 0, 0.35);
 }
 
 .opponentsTopRow {
   position: absolute;
-  top: clamp(7px, 0.933cqw, 14px);
-  left: 50%;
+  top: 14px;
+  left: 0;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: clamp(6px, 1.067cqw, 16px);
+  width: 100%;
+  height: 92px;
 
-  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .opponent {
-  position: static;
+  position: absolute;
 
-  padding:
-    clamp(5px, 0.667cqw, 10px)
-    clamp(8px, 1.067cqw, 16px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
 
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: clamp(6px, 0.8cqw, 12px);
+  min-width: 210px;
+  padding: 8px 14px 8px 8px;
 
-  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 48px 14px 14px 48px;
 
-  text-align: center;
+  background: rgba(0, 0, 0, 0.34);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
-.opponent p {
-  margin: 0;
-
-  font-size: clamp(10px, 1.067cqw, 16px);
-  font-weight: 700;
-  letter-spacing: clamp(1px, 0.133cqw, 2px);
+.opponentLeft {
+  top: 2px;
+  left: 22%;
+  transform: translateX(-100%);
 }
 
-.opponent span {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: clamp(8px, 0.8cqw, 12px);
+.opponentCenter {
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.opponentRight {
+  top: 2px;
+  right: 22%;
+  transform: translateX(100%);
+}
+
+.opponentIcon {
+  width: 68px;
+  height: 68px;
+  flex: 0 0 68px;
+
+  border: 2px solid rgba(238, 210, 132, 0.88);
+  border-radius: 50%;
+
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+
+  box-shadow:
+    0 0 0 3px rgba(0, 0, 0, 0.2),
+    0 5px 12px rgba(0, 0, 0, 0.32);
+}
+
+.opponentRemaining {
+  height: 68px;
+
+  display: flex;
+  align-items: center;
+
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+
+  color: #f4f0df;
+  white-space: nowrap;
+
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
 
 .board {
@@ -207,7 +239,7 @@ body,
 
   display: flex;
   flex-direction: column;
-  gap: clamp(3px, 0.4cqw, 6px);
+  gap: 2px;
 }
 
 .boardRow {
@@ -215,7 +247,7 @@ body,
   grid-template-columns:
     clamp(20px, 2.4cqw, 36px)
     1fr;
-  gap: clamp(2px, 0.533cqw, 8px);
+  gap: 4px;
   align-items: center;
 }
 
@@ -241,7 +273,7 @@ body,
       1fr
     )
   );
-  gap: clamp(2px, 0.333cqw, 5px);
+  gap: 2px;
 }
 
 .sevensCard,
@@ -533,13 +565,13 @@ body,
   width: 10.667cqw;
   min-width: 0;
 
-  padding:
-    0.8cqw
-    1.067cqw;
+  min-height: 10.667cqw;
+
+  padding: 0;
 
   border-radius: 0.667cqw;
 
-  font-size: 1.067cqw;
+  font-size: 1.3cqw;
   white-space: nowrap;
 
   cursor: pointer;

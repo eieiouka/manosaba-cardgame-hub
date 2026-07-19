@@ -35,6 +35,30 @@ const initialBoard = {
   clubs: [7],
 };
 
+const opponents = [
+  {
+    id: "player2",
+    name: "桜羽エマ",
+    remaining: 11,
+    image: "/characters/sakuraba_ema.png",
+    position: "opponentLeft",
+  },
+  {
+    id: "player3",
+    name: "橘シェリー",
+    remaining: 10,
+    image: "/characters/tachibana_sherry.png",
+    position: "opponentCenter",
+  },
+  {
+    id: "player4",
+    name: "遠野ハンナ",
+    remaining: 10,
+    image: "/characters/toono_hanna.png",
+    position: "opponentRight",
+  },
+];
+
 const initialHand = [
   { suit: "spades", rank: 3 },
   { suit: "spades", rank: 6 },
@@ -331,22 +355,24 @@ function Sevens({ navigate }) {
         </header>
 
         <section className="sevensTable">
-          <section className="opponentsTopRow">
-            <section className="opponent">
-              <p>PLAYER 2</p>
-              <span>残り11枚</span>
-            </section>
+            <section className="opponentsTopRow" aria-label="対戦相手">
+                {opponents.map((opponent) => (
+                <section
+                    className={`opponent ${opponent.position}`}
+                    key={opponent.id}
+                >
+                    <img
+                    className="opponentIcon"
+                    src={opponent.image}
+                    alt={opponent.name}
+                    />
 
-            <section className="opponent">
-              <p>PLAYER 3</p>
-              <span>残り10枚</span>
+                    <div className="opponentRemaining">
+                    残り{opponent.remaining}枚
+                    </div>
+                </section>
+                ))}
             </section>
-
-            <section className="opponent">
-              <p>PLAYER 4</p>
-              <span>残り10枚</span>
-            </section>
-          </section>
 
           <section className="board">
             {suits.map((suit) => (
