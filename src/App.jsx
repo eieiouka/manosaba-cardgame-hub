@@ -7,7 +7,6 @@ const games = [
     suit: "♠",
     title: "SEVENS",
     japaneseTitle: "七並べ",
-    description: "最初のゲーム",
     path: "/sevens",
     available: true,
   },
@@ -46,9 +45,6 @@ function App() {
 
           <div className="line" />
 
-          <p className="description">
-            まのさばカードゲーム HUB
-          </p>
         </header>
 
         <section className="gameList">
@@ -70,10 +66,6 @@ function App() {
 
                   <div className="japanese">
                     {game.japaneseTitle}
-                  </div>
-
-                  <div className="gameDescription">
-                    {game.description}
                   </div>
                 </div>
               </div>

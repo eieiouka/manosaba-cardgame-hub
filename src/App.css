@@ -72,14 +72,16 @@ button {
 
   border-radius: 28px;
 
-  background: rgba(10, 10, 14, 0.42);
+  background: rgba(18, 28, 45, 0.55);
 
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(220, 190, 110, 0.85);
 
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 0 0 5px rgba(255, 255, 255, 0.08),
+    0 20px 60px rgba(0, 0, 0, 0.45);
 
   text-align: center;
 }
@@ -190,15 +192,6 @@ button {
   margin-top: 2px;
 
   font-size: 18px;
-  font-weight: 400;
-}
-
-.gameDescription {
-  margin-top: 6px;
-
-  color: #ccc;
-
-  font-size: 14px;
   font-weight: 400;
 }
 
