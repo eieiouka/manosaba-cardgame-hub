@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import backgroundImage from "./assets/background.jpg";
-import Sevens from "./sevens/Sevens";
+import SevensGame from "./sevens/SevensGame";
 
 const games = [
   {
@@ -37,7 +37,7 @@ function App() {
   };
 
   if (currentPath === "/sevens") {
-    return <Sevens navigate={navigate} />;
+    return <SevensGame navigate={navigate} />;
   }
 
   return (
