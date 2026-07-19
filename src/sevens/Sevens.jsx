@@ -59,25 +59,6 @@ const opponents = [
   },
 ];
 
-const initialHand = [
-  { suit: "spades", rank: 3 },
-  { suit: "spades", rank: 6 },
-  { suit: "spades", rank: 8 },
-  { suit: "spades", rank: 10 },
-
-  { suit: "hearts", rank: 4 },
-  { suit: "hearts", rank: 6 },
-  { suit: "hearts", rank: 8 },
-
-  { suit: "diamonds", rank: 2 },
-  { suit: "diamonds", rank: 6 },
-  { suit: "diamonds", rank: 8 },
-  { suit: "diamonds", rank: 11 },
-
-  { suit: "clubs", rank: 6 },
-  { suit: "clubs", rank: 8 },
-];
-
 function getRankFileName(rank) {
   if (rank === 1) return "A";
   if (rank === 10) return "T";
@@ -193,12 +174,16 @@ function EmptyCardSlot({ rank, playable = false }) {
   );
 }
 
-function Sevens({ navigate }) {
-  const [board, setBoard] = useState(initialBoard);
-  const [hand, setHand] = useState(initialHand);
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [passes, setPasses] = useState(3);
-  const [gameScale, setGameScale] = useState(1);
+function Sevens({ navigate, hands }) {
+    const playerHand = hands[0] ?? [];
+    const cpu1Hand = hands[1] ?? [];
+    const cpu2Hand = hands[2] ?? [];
+    const cpu3Hand = hands[3] ?? [];
+    const [board, setBoard] = useState(initialBoard);
+    const [hand, setHand] = useState(playerHand);
+    const [selectedCard, setSelectedCard] = useState(null);
+    const [passes, setPasses] = useState(3);
+    const [gameScale, setGameScale] = useState(1);
 
   useEffect(() => {
     const updateGameScale = () => {
@@ -308,12 +293,12 @@ function Sevens({ navigate }) {
     setSelectedCard(null);
   };
 
-  const restartGame = () => {
+    const restartGame = () => {
     setBoard(initialBoard);
-    setHand(initialHand);
+    setHand(playerHand);
     setSelectedCard(null);
     setPasses(3);
-  };
+    };
 
   return (
     <main className="sevensPage">

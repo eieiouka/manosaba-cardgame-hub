@@ -1,32 +1,28 @@
 import { useState } from "react";
-
-import Sevens from "./Sevens";
 import StartScreen from "./StartScreen";
-
-import "./SevensGame.css";
+import Sevens from "./Sevens";
+import { dealCards } from "./sevensLogic";
 
 function SevensGame() {
-  const [gamePhase, setGamePhase] = useState("start");
+  const [phase, setPhase] = useState("start");
+  const [hands, setHands] = useState([]);
 
-  function handleGameStart() {
-    setGamePhase("playing");
+  const handleStart = () => {
+    const dealtHands = dealCards(4);
+
+    setHands(dealtHands);
+    setPhase("playing");
+  };
+
+  if (phase === "start") {
+    return <StartScreen onStart={handleStart} />;
   }
 
-  function handleRestart() {
-    setGamePhase("start");
+  if (phase === "playing") {
+    return <Sevens hands={hands} />;
   }
 
-  return (
-    <main className="sevensGame">
-      {gamePhase === "start" && (
-        <StartScreen onStart={handleGameStart} />
-      )}
-
-      {gamePhase === "playing" && (
-        <Sevens onRestart={handleRestart} />
-      )}
-    </main>
-  );
+  return null;
 }
 
 export default SevensGame;
