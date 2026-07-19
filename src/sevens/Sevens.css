@@ -3,8 +3,15 @@
 }
 
 .sevensPage {
-  min-height: 100vh;
-  padding: clamp(8px, 1.333vw, 20px);
+  --usable-height: calc(100vh - 120px);
+
+  --game-width: min(
+    1500px,
+    calc(var(--usable-height) * 1.46)
+  );
+
+  min-height: 100svh;
+  padding: 16px;
 
   color: #fff;
 
@@ -89,7 +96,12 @@
 .sevensTable {
   position: relative;
 
-  width: min(1500px, 100%);
+  width: min(
+    1500px,
+    100%,
+    calc((100svh - 120px) * 1.46)
+  );
+
   min-height: 0;
 
   margin: 0 auto;
@@ -341,8 +353,7 @@
 }
 
 .playerArea {
-  --hand-card-width: clamp(72px, 7.333vw, 110px);
-  --hand-card-overlap: calc(var(--hand-card-width) * -0.28);
+  --hand-card-width: clamp(144px, 14.667vw, 220px);
 
   position: static;
 
@@ -358,9 +369,12 @@
 }
 
 .playerHand {
-  width: 100%;
+  --hand-step: 0%;
+
+  width: min(1120px, 100%);
   min-width: 0;
   min-height: calc(var(--hand-card-width) * 1.5);
+  margin: 0 auto;
 
   display: flex;
   justify-content: center;
@@ -369,15 +383,71 @@
   overflow: visible;
 }
 
-.playerHand .sevensCard {
+.playerHandTrack {
   position: relative;
+
+  width: calc(100% - var(--hand-card-width));
+  height: calc(var(--hand-card-width) * 1.5);
+  margin-right: var(--hand-card-width);
+}
+
+.playerHand[data-count="2"] {
+  --hand-step: 100%;
+}
+
+.playerHand[data-count="3"] {
+  --hand-step: 50%;
+}
+
+.playerHand[data-count="4"] {
+  --hand-step: 33.333333%;
+}
+
+.playerHand[data-count="5"] {
+  --hand-step: 25%;
+}
+
+.playerHand[data-count="6"] {
+  --hand-step: 20%;
+}
+
+.playerHand[data-count="7"] {
+  --hand-step: 16.666667%;
+}
+
+.playerHand[data-count="8"] {
+  --hand-step: 14.285714%;
+}
+
+.playerHand[data-count="9"] {
+  --hand-step: 12.5%;
+}
+
+.playerHand[data-count="10"] {
+  --hand-step: 11.111111%;
+}
+
+.playerHand[data-count="11"] {
+  --hand-step: 10%;
+}
+
+.playerHand[data-count="12"] {
+  --hand-step: 9.090909%;
+}
+
+.playerHand[data-count="13"] {
+  --hand-step: 8.333333%;
+}
+
+.playerHand .sevensCard {
+  position: absolute;
+  bottom: 0;
+  left: calc(var(--hand-index) * var(--hand-step));
 
   width: var(--hand-card-width);
   height: auto;
   aspect-ratio: 2 / 3;
-  flex: 0 0 var(--hand-card-width);
 
-  margin-left: var(--hand-card-overlap);
   padding: 0;
 
   cursor: pointer;
@@ -388,28 +458,28 @@
     filter 0.2s ease;
 }
 
-.playerHand .sevensCard:first-child {
-  margin-left: 0;
+.playerHand[data-count="1"] .sevensCard {
+  left: 50%;
 }
 
 .playerHand .sevensCard:hover {
-  transform: translateY(clamp(-12px, -0.8vw, -7px));
+  transform: translateY(clamp(-18px, -1.2vw, -10px));
 }
 
 .playerHand .playableCard {
   filter:
     brightness(1.08)
     drop-shadow(
-      0 0 clamp(4px, 0.533vw, 8px)
+      0 0 clamp(6px, 0.8vw, 12px)
       rgba(255, 220, 115, 0.8)
     );
 }
 
 .playerHand .selectedCard {
-  transform: translateY(clamp(-24px, -1.6vw, -14px));
+  transform: translateY(clamp(-36px, -2.4vw, -20px));
 
-  outline: clamp(2px, 0.2vw, 3px) solid #f0cb69;
-  outline-offset: clamp(1px, 0.133vw, 2px);
+  outline: clamp(2px, 0.267vw, 4px) solid #f0cb69;
+  outline-offset: clamp(1px, 0.2vw, 3px);
 }
 
 .actionButtons {
@@ -517,11 +587,15 @@
   }
 
   .playerArea {
-    --hand-card-width: clamp(48px, 11.5vw, 72px);
+    --hand-card-width: clamp(96px, 24vw, 144px);
 
     width: 100%;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 6px;
+  }
+
+  .playerHand {
+    width: 100%;
   }
 
   .actionButtons {

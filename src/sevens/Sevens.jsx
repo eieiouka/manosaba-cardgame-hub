@@ -35,13 +35,16 @@ const initialHand = [
   { suit: "spades", rank: 3 },
   { suit: "spades", rank: 6 },
   { suit: "spades", rank: 8 },
+  { suit: "spades", rank: 10 },
 
+  { suit: "hearts", rank: 4 },
   { suit: "hearts", rank: 6 },
   { suit: "hearts", rank: 8 },
 
   { suit: "diamonds", rank: 2 },
   { suit: "diamonds", rank: 6 },
   { suit: "diamonds", rank: 8 },
+  { suit: "diamonds", rank: 11 },
 
   { suit: "clubs", rank: 6 },
   { suit: "clubs", rank: 8 },
@@ -339,26 +342,40 @@ function Sevens({ navigate }) {
         </section>
 
         <section className="playerArea">
-          <div className="playerHand">
-            {sortedHand.map((card, index) => {
-              const playable = isPlayable(card, board);
+          <div
+            className="playerHand"
+            data-count={sortedHand.length}
+          >
+            <div className="playerHandTrack">
+              {sortedHand.map((card, index) => {
+                const playable = isPlayable(card, board);
 
-              const selected =
-                selectedCard?.suit === card.suit &&
-                selectedCard?.rank === card.rank;
+                const selected =
+                  selectedCard?.suit === card.suit &&
+                  selectedCard?.rank === card.rank;
 
-              return (
-                <PlayingCard
-                  key={`${card.suit}-${card.rank}`}
-                  suit={card.suit}
-                  rank={card.rank}
-                  playable={playable}
-                  selected={selected}
-                  style={{ zIndex: index + 1 }}
-                  onClick={() => selectCard(card)}
-                />
-              );
-            })}
+                return (
+                  <PlayingCard
+                    key={`${card.suit}-${card.rank}`}
+                    suit={card.suit}
+                    rank={card.rank}
+                    playable={playable}
+                    selected={selected}
+                    style={{
+                      "--hand-index": index,
+                      zIndex: index + 1,
+                    }}
+                    onClick={() => {
+                        if (selected) {
+                            playCard();
+                        } else {
+                            selectCard(card);
+                        }
+                    }}
+                  />
+                );
+              })}
+            </div>
           </div>
 
           <div className="actionButtons">
