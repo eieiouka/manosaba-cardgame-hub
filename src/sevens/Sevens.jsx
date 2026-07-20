@@ -147,8 +147,20 @@ function isPlayable(card, board) {
   return card.rank === lowest - 1 || card.rank === highest + 1;
 }
 
-function getNextPlayerIndex(currentPlayerIndex) {
-  return (currentPlayerIndex + 1) % 4;
+function getNextPlayerIndex(
+  currentPlayerIndex,
+  burstPlayers = [],
+) {
+  for (let offset = 1; offset <= 4; offset += 1) {
+    const nextPlayerIndex =
+      (currentPlayerIndex + offset) % 4;
+
+    if (!burstPlayers.includes(nextPlayerIndex)) {
+      return nextPlayerIndex;
+    }
+  }
+
+  return currentPlayerIndex;
 }
 
 function PlayingCard({
@@ -288,8 +300,11 @@ function Sevens({
   const [openingDone, setOpeningDone] =
     useState(false);
 
-  const [flyingCard, setFlyingCard] =
-    useState(null);
+  const [flyingCards, setFlyingCards] =
+    useState([]);
+
+  const [burstPlayers, setBurstPlayers] =
+    useState([]);
 
   const [winnerIndex, setWinnerIndex] =
     useState(null);
@@ -423,11 +438,18 @@ function Sevens({
             );
             }
 
-            setFlyingCard({
-              ...card,
-              targetLeft: targetCenter.left,
-              targetTop: targetCenter.top,
-            });
+            const flyingCardId =
+              `opening-${card.ownerIndex}-${card.suit}-7-${index}`;
+
+            setFlyingCards((currentFlyingCards) => [
+              ...currentFlyingCards,
+              {
+                ...card,
+                id: flyingCardId,
+                targetLeft: targetCenter.left,
+                targetTop: targetCenter.top,
+              },
+            ]);
         }, index * launchInterval);
 
         const landingTimer = window.setTimeout(() => {
@@ -449,7 +471,14 @@ function Sevens({
         };
         });
 
-        setFlyingCard(null);
+        const flyingCardId =
+          `opening-${card.ownerIndex}-${card.suit}-7-${index}`;
+
+        setFlyingCards((currentFlyingCards) =>
+          currentFlyingCards.filter(
+            (flyingCard) => flyingCard.id !== flyingCardId,
+          ),
+        );
         }, index * launchInterval + flightDuration);
 
         timers.push(launchTimer, landingTimer);
@@ -460,7 +489,7 @@ function Sevens({
         return;
         }
 
-        setFlyingCard(null);
+        setFlyingCards([]);
         setCurrentPlayerIndex(firstPlayerIndex);
         setOpeningDone(true);
     }, orderedSevens.length * launchInterval + 100);
@@ -489,6 +518,21 @@ function Sevens({
             return undefined;
         }
 
+        if (flyingCards.length > 0) {
+            return undefined;
+        }
+
+        if (burstPlayers.includes(currentPlayerIndex)) {
+            setCurrentPlayerIndex(
+                getNextPlayerIndex(
+                currentPlayerIndex,
+                burstPlayers,
+                ),
+            );
+
+            return undefined;
+        }
+
         if (currentPlayerIndex === 0) {
             return undefined;
         }
@@ -499,10 +543,27 @@ function Sevens({
             const cpuHand = cpuHands[cpuIndex];
             const remainingPasses = cpuPasses[cpuIndex];
 
+            const hasPlayableCard = cpuHand.some((card) =>
+            isPlayable(card, board),
+            );
+
+            if (
+            remainingPasses === 0 &&
+            !hasPlayableCard &&
+            cpuHand.length > 0
+            ) {
+            burstPlayer({
+                playerIndex: currentPlayerIndex,
+                cards: cpuHand,
+            });
+
+            return;
+            }
+
             const action = chooseCpuAction({
-            cpuHand,
-            board,
-            remainingPasses,
+                cpuHand,
+                board,
+                remainingPasses,
             });
 
             if (action.type === "play") {
@@ -544,7 +605,10 @@ function Sevens({
                     }
 
                     setCurrentPlayerIndex(
-                        getNextPlayerIndex(currentPlayerIndex),
+                        getNextPlayerIndex(
+                            currentPlayerIndex,
+                            burstPlayers,
+                        ),
                     );
                     },
                 });
@@ -564,9 +628,12 @@ function Sevens({
             }
 
             setCurrentPlayerIndex(
-            getNextPlayerIndex(currentPlayerIndex),
+                getNextPlayerIndex(
+                    currentPlayerIndex,
+                    burstPlayers,
+                ),
             );
-        }, 800);
+        }, 10);
 
         return () => {
             window.clearTimeout(cpuTimer);
@@ -578,6 +645,8 @@ function Sevens({
         cpuHands,
         cpuPasses,
         winnerIndex,
+        flyingCards,
+        burstPlayers,
     ]);
 
   const sortedHand = useMemo(() => {
@@ -628,21 +697,212 @@ function Sevens({
         return;
     }
 
-    setFlyingCard({
+    const flyingCardId =
+        `normal-${ownerIndex}-${card.suit}-${card.rank}-${Date.now()}`;
+
+    setFlyingCards((currentFlyingCards) => [
+        ...currentFlyingCards,
+        {
         ...card,
+        id: flyingCardId,
         ownerIndex,
         targetLeft: targetCenter.left,
         targetTop: targetCenter.top,
-    });
+        },
+    ]);
 
     window.setTimeout(() => {
-        setFlyingCard(null);
+        setFlyingCards((currentFlyingCards) =>
+        currentFlyingCards.filter(
+            (flyingCard) =>
+            flyingCard.id !== flyingCardId,
+        ),
+        );
+
         onLanding();
     }, 600);
-    };
+  };
+
+  const burstPlayer = ({
+    playerIndex,
+    cards,
+    }) => {
+    if (cards.length === 0) {
+        return;
+    }
+
+    const tableElement = tableRef.current;
+    const burstId =
+        `burst-${playerIndex}-${Date.now()}`;
+
+    const nextFlyingCards = cards
+        .map((card, index) => {
+        const targetElement =
+            tableElement?.querySelector(
+            `[data-board-suit="${card.suit}"][data-board-rank="${card.rank}"]`,
+            );
+
+        if (!tableElement || !targetElement) {
+            return null;
+        }
+
+        const targetCenter =
+            getElementCenterRelativeTo(
+            targetElement,
+            tableElement,
+            );
+
+        if (!targetCenter) {
+            return null;
+        }
+
+        return {
+            ...card,
+            id: `${burstId}-${index}`,
+            burstId,
+            ownerIndex: playerIndex,
+            targetLeft: targetCenter.left,
+            targetTop: targetCenter.top,
+        };
+        })
+        .filter(Boolean);
+
+    // 飛行開始前に手札をすべて消す
+    if (playerIndex === 0) {
+        setHand([]);
+        setSelectedCard(null);
+    } else {
+        const cpuIndex = playerIndex - 1;
+
+        setCpuHands((currentCpuHands) =>
+        currentCpuHands.map(
+            (cpuHand, index) =>
+            index === cpuIndex ? [] : cpuHand,
+        ),
+        );
+    }
+
+    const nextBurstPlayers = [
+        ...burstPlayers,
+        playerIndex,
+    ].filter(
+        (value, index, array) =>
+        array.indexOf(value) === index,
+    );
+
+    setBurstPlayers(nextBurstPlayers);
+
+    setFlyingCards((currentFlyingCards) => [
+        ...currentFlyingCards,
+        ...nextFlyingCards,
+    ]);
+
+    window.setTimeout(() => {
+        setBoard((currentBoard) => {
+        const nextBoard = {
+            spades: [...currentBoard.spades],
+            hearts: [...currentBoard.hearts],
+            diamonds: [...currentBoard.diamonds],
+            clubs: [...currentBoard.clubs],
+        };
+
+        cards.forEach((card) => {
+            if (
+            !nextBoard[card.suit].includes(card.rank)
+            ) {
+            nextBoard[card.suit].push(card.rank);
+            }
+        });
+
+        Object.keys(nextBoard).forEach((suit) => {
+            nextBoard[suit].sort(
+            (rankA, rankB) => rankA - rankB,
+            );
+        });
+
+        return nextBoard;
+        });
+
+        setFlyingCards((currentFlyingCards) =>
+        currentFlyingCards.filter(
+            (flyingCard) =>
+            flyingCard.burstId !== burstId,
+        ),
+        );
+
+        const remainingPlayers = [0, 1, 2, 3].filter(
+        (playerIndexValue) =>
+            !nextBurstPlayers.includes(
+            playerIndexValue,
+            ),
+        );
+
+        if (remainingPlayers.length === 1) {
+        setWinnerIndex(remainingPlayers[0]);
+        return;
+        }
+
+        setCurrentPlayerIndex(
+        getNextPlayerIndex(
+            playerIndex,
+            nextBurstPlayers,
+        ),
+        );
+    }, 600);
+  };
+
+useEffect(() => {
+  if (!openingDone) {
+    return;
+  }
+
+  if (winnerIndex !== null) {
+    return;
+  }
+
+  if (flyingCards.length > 0) {
+    return;
+  }
+
+  if (currentPlayerIndex !== 0) {
+    return;
+  }
+
+  if (burstPlayers.includes(0)) {
+    return;
+  }
+
+  const hasPlayableCard = hand.some((card) =>
+    isPlayable(card, board),
+  );
+
+  if (
+    passes === 0 &&
+    !hasPlayableCard &&
+    hand.length > 0
+  ) {
+    burstPlayer({
+      playerIndex: 0,
+      cards: hand,
+    });
+  }
+}, [
+  openingDone,
+  winnerIndex,
+  flyingCards,
+  currentPlayerIndex,
+  burstPlayers,
+  hand,
+  board,
+  passes,
+]);
 
   const selectCard = (card) => {
-    if (flyingCard) {
+    if (flyingCards.length > 0) {
+        return;
+    }
+
+    if (burstPlayers.includes(0)) {
         return;
     }
 
@@ -662,7 +922,11 @@ function Sevens({
   };
 
   const playCard = () => {
-    if (flyingCard) {
+    if (flyingCards.length > 0) {
+        return;
+    }
+
+    if (burstPlayers.includes(0)) {
         return;
     }
 
@@ -719,14 +983,21 @@ function Sevens({
         }
 
         setCurrentPlayerIndex(
-            getNextPlayerIndex(0),
+            getNextPlayerIndex(
+                0,
+                burstPlayers,
+            ),
         );
         },
     });
     };
 
   const passTurn = () => {
-    if (flyingCard) {
+    if (flyingCards.length > 0) {
+        return;
+    }
+
+    if (burstPlayers.includes(0)) {
         return;
     }
 
@@ -746,7 +1017,10 @@ function Sevens({
     setSelectedCard(null);
 
     setCurrentPlayerIndex(
-      getNextPlayerIndex(currentPlayerIndex),
+        getNextPlayerIndex(
+            currentPlayerIndex,
+            burstPlayers,
+        ),
     );
   };
 
@@ -757,7 +1031,8 @@ function Sevens({
         setSelectedCard(null);
         setPasses(3);
         setCpuPasses([3, 3, 3]);
-        setFlyingCard(null);
+        setFlyingCards([]);
+        setBurstPlayers([]);
         setCurrentPlayerIndex(firstPlayerIndex);
         setWinnerIndex(null);
         setOpeningDone(false);
@@ -806,7 +1081,7 @@ function Sevens({
             ref={tableRef}
             className="sevensTable"
         >
-            {flyingCard && (
+            {flyingCards.map((flyingCard) => (
                 <div
                     key={flyingCard.id}
                     className="openingFlyingCard"
@@ -824,17 +1099,17 @@ function Sevens({
                     "--opening-end-left":
                         `${flyingCard.targetLeft}px`,
 
-                        "--opening-end-top":
+                    "--opening-end-top":
                         `${flyingCard.targetTop}px`,
                     }}
                 >
                     <PlayingCard
-                        suit={flyingCard.suit}
-                        rank={flyingCard.rank}
-                        small
+                    suit={flyingCard.suit}
+                    rank={flyingCard.rank}
+                    small
                     />
                 </div>
-                )}
+            ))}
             <section className="opponentsTopRow" aria-label="対戦相手">
                 {opponents.map((opponent, opponentIndex) => {
                     const playerIndex = opponentIndex + 1;
@@ -991,7 +1266,8 @@ function Sevens({
                 className="playCardButton"
                 onClick={playCard}
                 disabled={
-                !!flyingCard ||
+                flyingCards.length > 0 ||
+                burstPlayers.includes(0) ||
                 !openingDone ||
                 currentPlayerIndex !== 0 ||
                 !selectedCard
@@ -1005,7 +1281,8 @@ function Sevens({
                 className="passButton"
                 onClick={passTurn}
                 disabled={
-                !!flyingCard ||
+                flyingCards.length > 0 ||
+                burstPlayers.includes(0) ||
                 !openingDone ||
                 currentPlayerIndex !== 0 ||
                 passes <= 0
