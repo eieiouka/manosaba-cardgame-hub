@@ -5,6 +5,7 @@ import {
   useState,
 } from "react";
 
+import { chooseCpuAction } from "./sevensCpu";
 import "./Sevens.css";
 
 const GAME_WIDTH = 1500;
@@ -143,6 +144,10 @@ function isPlayable(card, board) {
   const highest = Math.max(...playedCards);
 
   return card.rank === lowest - 1 || card.rank === highest + 1;
+}
+
+function getNextPlayerIndex(currentPlayerIndex) {
+  return (currentPlayerIndex + 1) % 4;
 }
 
 function PlayingCard({
@@ -471,6 +476,82 @@ function Sevens({
     firstPlayerIndex,
     ]);
 
+    useEffect(() => {
+        if (!openingDone) {
+            return undefined;
+        }
+
+        if (currentPlayerIndex === 0) {
+            return undefined;
+        }
+
+        const cpuIndex = currentPlayerIndex - 1;
+
+        const cpuTimer = window.setTimeout(() => {
+            const cpuHand = cpuHands[cpuIndex];
+            const remainingPasses = cpuPasses[cpuIndex];
+
+            const action = chooseCpuAction({
+            cpuHand,
+            board,
+            remainingPasses,
+            });
+
+            if (action.type === "play") {
+            const playedCard = action.card;
+
+            setCpuHands((currentCpuHands) =>
+                currentCpuHands.map(
+                (currentCpuHand, index) => {
+                    if (index !== cpuIndex) {
+                    return currentCpuHand;
+                    }
+
+                    return currentCpuHand.filter(
+                    (card) =>
+                        card.suit !== playedCard.suit ||
+                        card.rank !== playedCard.rank,
+                    );
+                },
+                ),
+            );
+
+            setBoard((currentBoard) => ({
+                ...currentBoard,
+                [playedCard.suit]: [
+                ...currentBoard[playedCard.suit],
+                playedCard.rank,
+                ],
+            }));
+            }
+
+            if (action.type === "pass") {
+            setCpuPasses((currentCpuPasses) =>
+                currentCpuPasses.map(
+                (remaining, index) =>
+                    index === cpuIndex
+                    ? Math.max(0, remaining - 1)
+                    : remaining,
+                ),
+            );
+            }
+
+            setCurrentPlayerIndex(
+            getNextPlayerIndex(currentPlayerIndex),
+            );
+        }, 800);
+
+        return () => {
+            window.clearTimeout(cpuTimer);
+        };
+        }, [
+        openingDone,
+        currentPlayerIndex,
+        board,
+        cpuHands,
+        cpuPasses,
+    ]);
+
   const sortedHand = useMemo(() => {
     const suitOrder = {
       spades: 1,
@@ -542,6 +623,9 @@ function Sevens({
     );
 
     setSelectedCard(null);
+    setCurrentPlayerIndex(
+      getNextPlayerIndex(currentPlayerIndex),
+    );
   };
 
   const passTurn = () => {
@@ -559,6 +643,10 @@ function Sevens({
 
     setPasses((current) => current - 1);
     setSelectedCard(null);
+
+    setCurrentPlayerIndex(
+      getNextPlayerIndex(currentPlayerIndex),
+    );
   };
 
     const restartGame = () => {
@@ -567,6 +655,7 @@ function Sevens({
         setCpuHands(initialCpuHands);
         setSelectedCard(null);
         setPasses(3);
+        setCpuPasses([3, 3, 3]);
         setFlyingCard(null);
         setCurrentPlayerIndex(firstPlayerIndex);
         setOpeningDone(false);
