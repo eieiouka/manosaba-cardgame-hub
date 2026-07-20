@@ -270,6 +270,13 @@ function Sevens({
 
   const [selectedCard, setSelectedCard] = useState(null);
   const [passes, setPasses] = useState(3);
+
+  const [cpuPasses, setCpuPasses] = useState([
+    3,
+    3,
+    3,
+  ]);
+
   const [gameScale, setGameScale] = useState(1);
 
   const [openingDone, setOpeningDone] =
@@ -658,8 +665,28 @@ function Sevens({
                         alt={opponent.name}
                         />
 
-                        <div className="opponentRemaining">
-                        残り{cpuHands[opponentIndex].length}枚
+                        <div className="opponentInfoRow">
+                            <span className="opponentRemaining">
+                                残り{cpuHands[opponentIndex].length}枚
+                            </span>
+
+                            <div
+                                className="opponentPasses"
+                                aria-label={`残りパス${cpuPasses[opponentIndex]}回`}
+                            >
+                                {Array.from({ length: 3 }, (_, passIndex) => (
+                                <span
+                                    key={passIndex}
+                                    className={`opponentPassIcon ${
+                                    passIndex < cpuPasses[opponentIndex]
+                                        ? "passAvailable"
+                                        : "passUsed"
+                                    }`}
+                                >
+                                    ●
+                                </span>
+                                ))}
+                            </div>
                         </div>
                     </section>
                     );

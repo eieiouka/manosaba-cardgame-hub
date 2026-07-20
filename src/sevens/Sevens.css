@@ -788,3 +788,42 @@ body,
       scale(1);
   }
 }
+
+.opponentInfoRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45cqw;
+
+  width: 100%;
+  white-space: nowrap;
+}
+
+.opponentInfoRow .opponentRemaining {
+  margin: 0;
+  line-height: 1;
+}
+
+.opponentPasses {
+  display: flex;
+  align-items: center;
+  gap: 0.18cqw;
+  line-height: 1;
+}
+
+.opponentPassIcon {
+  font-size: 0.9cqw;
+  line-height: 1;
+}
+
+.opponentPassIcon.passAvailable {
+  color: #f2d06b;
+
+  text-shadow:
+    0 0 0.3cqw rgba(242, 208, 107, 0.8);
+}
+
+.opponentPassIcon.passUsed {
+  color: rgba(255, 255, 255, 0.2);
+  text-shadow: none;
+}
