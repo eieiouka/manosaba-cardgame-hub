@@ -184,6 +184,65 @@ body,
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
+/* ==============================
+   現在手番の相手
+   ============================== */
+
+.opponent.currentOpponent {
+  border-color: #ff3045;
+
+  box-shadow:
+    0 0 0 5px rgba(255, 45, 60, 0.8),
+    0 0 20px rgba(255, 35, 50, 0.9),
+    0 8px 18px rgba(0, 0, 0, 0.22);
+}
+
+
+/* ==============================
+   自分の手番で出せるカード
+   ============================== */
+
+.playerHand .playableCard {
+  position: relative;
+}
+
+.playerHand .playableCard::after {
+  content: "";
+  position: absolute;
+
+  inset: 4px;              /* カードにぴったり */
+  border: 4px solid #ff3045;
+  border-radius: inherit;
+
+  pointer-events: none;
+
+  box-shadow: 0 0 12px rgba(255, 45, 60, 0.9);
+}
+
+
+/* 出せるカードへカーソルを合わせたとき */
+
+.playerHand .playableCard:hover {
+  transform:
+    translateY(-12px)
+    scale(1.04);
+
+  filter:
+    brightness(1.15)
+    drop-shadow(0 0 15px rgba(255, 35, 55, 1));
+}
+
+
+/* 選択中は赤ではなく、既存の選択表示を優先 */
+
+.playerHand .playableCard.selectedCard {
+  outline-color: #ffd84d;
+
+  filter:
+    brightness(1.12)
+    drop-shadow(0 0 12px rgba(255, 216, 77, 0.95));
+}
+
 .opponentLeft {
   top: 2px;
   left: 22%;
@@ -537,12 +596,28 @@ body,
 }
 
 .playerHand .playableCard {
-  filter:
-    brightness(1.08)
-    drop-shadow(
-      0 0 0.8cqw
-      rgba(255, 220, 115, 0.8)
-    );
+  animation: playableCardGlow 0.9s ease-in-out infinite;
+}
+
+@keyframes playableCardGlow {
+  0%,
+  100% {
+    filter:
+      brightness(1.05)
+      drop-shadow(
+        0 0 0.5cqw
+        rgba(255, 45, 60, 0.65)
+      );
+  }
+
+  50% {
+    filter:
+      brightness(1.15)
+      drop-shadow(
+        0 0 1.2cqw
+        rgba(255, 45, 60, 1)
+      );
+  }
 }
 
 .playerHand .selectedCard {
@@ -579,6 +654,25 @@ body,
   transition:
     opacity 0.2s ease,
     transform 0.2s ease;
+}
+
+.actionButtons.playerTurn .passButton:not(:disabled) {
+  animation: playerTurnButtonGlow 0.9s ease-in-out infinite;
+}
+
+@keyframes playerTurnButtonGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px rgba(255, 45, 60, 0.45),
+      0 0 8px rgba(255, 45, 60, 0.45);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(255, 45, 60, 0.9),
+      0 0 18px rgba(255, 45, 60, 1);
+  }
 }
 
 .actionButtons button:hover:not(:disabled) {

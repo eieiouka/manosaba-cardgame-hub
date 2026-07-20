@@ -252,12 +252,19 @@ function Sevens({
   firstPlayerIndex,
 }) {
   const playerHand = hands[0] ?? [];
-  const cpu1Hand = hands[1] ?? [];
-  const cpu2Hand = hands[2] ?? [];
-  const cpu3Hand = hands[3] ?? [];
+  const initialCpuHands = [
+    hands[1] ?? [],
+    hands[2] ?? [],
+    hands[3] ?? [],
+  ];
 
   const [board, setBoard] = useState(emptyBoard);
   const [hand, setHand] = useState(playerHand);
+
+  const [cpuHands, setCpuHands] = useState(
+    initialCpuHands
+  );
+
   const [currentPlayerIndex, setCurrentPlayerIndex] =
     useState(firstPlayerIndex);
 
@@ -342,8 +349,8 @@ function Sevens({
         suitOrder[cardB.suit],
     );
 
-    const launchInterval = 950;
-    const flightDuration = 700;
+    const launchInterval = 600;
+    const flightDuration = 600;
 
     orderedSevens.forEach((card, index) => {
         const launchTimer = window.setTimeout(() => {
@@ -372,6 +379,34 @@ function Sevens({
               return;
             }
 
+            // 自分が持っていた7なら、飛行エフェクト開始前に手札から消す
+            // 7を出した人の手札から、飛行開始前にカードを消す
+            if (card.ownerIndex === 0) {
+            setHand((currentHand) =>
+                currentHand.filter(
+                (handCard) =>
+                    handCard.suit !== card.suit ||
+                    handCard.rank !== 7
+                )
+            );
+            } else {
+            const cpuIndex = card.ownerIndex - 1;
+
+            setCpuHands((currentCpuHands) =>
+                currentCpuHands.map((cpuHand, index) => {
+                if (index !== cpuIndex) {
+                    return cpuHand;
+                }
+
+                return cpuHand.filter(
+                    (handCard) =>
+                    handCard.suit !== card.suit ||
+                    handCard.rank !== 7
+                );
+                })
+            );
+            }
+
             setFlyingCard({
               ...card,
               targetLeft: targetCenter.left,
@@ -385,28 +420,18 @@ function Sevens({
         }
 
         setBoard((currentBoard) => {
-            if (currentBoard[card.suit]?.includes(7)) {
+        if (currentBoard[card.suit]?.includes(7)) {
             return currentBoard;
-            }
+        }
 
-            return {
+        return {
             ...currentBoard,
             [card.suit]: [
-                ...currentBoard[card.suit],
-                7,
+            ...currentBoard[card.suit],
+            7,
             ],
-            };
+        };
         });
-
-        if (card.ownerIndex === 0) {
-            setHand((currentHand) =>
-            currentHand.filter(
-                (handCard) =>
-                handCard.suit !== card.suit ||
-                handCard.rank !== 7,
-            ),
-            );
-        }
 
         setFlyingCard(null);
         }, index * launchInterval + flightDuration);
@@ -530,13 +555,14 @@ function Sevens({
   };
 
     const restartGame = () => {
-    setBoard(emptyBoard);
-    setHand(playerHand);
-    setSelectedCard(null);
-    setPasses(3);
-    setFlyingCard(null);
-    setCurrentPlayerIndex(firstPlayerIndex);
-    setOpeningDone(false);
+        setBoard(emptyBoard);
+        setHand(playerHand);
+        setCpuHands(initialCpuHands);
+        setSelectedCard(null);
+        setPasses(3);
+        setFlyingCard(null);
+        setCurrentPlayerIndex(firstPlayerIndex);
+        setOpeningDone(false);
     };
 
   return (
@@ -612,22 +638,32 @@ function Sevens({
                 </div>
                 )}
             <section className="opponentsTopRow" aria-label="対戦相手">
-                {opponents.map((opponent) => (
-                <section
-                    className={`opponent ${opponent.position}`}
-                    key={opponent.id}
-                >
-                    <img
-                    className="opponentIcon"
-                    src={opponent.image}
-                    alt={opponent.name}
-                    />
+                {opponents.map((opponent, opponentIndex) => {
+                    const playerIndex = opponentIndex + 1;
 
-                    <div className="opponentRemaining">
-                    残り{opponent.remaining}枚
-                    </div>
-                </section>
-                ))}
+                    const isCurrentOpponent =
+                    openingDone &&
+                    currentPlayerIndex === playerIndex;
+
+                    return (
+                    <section
+                        className={`opponent ${opponent.position} ${
+                        isCurrentOpponent ? "currentOpponent" : ""
+                        }`}
+                        key={opponent.id}
+                    >
+                        <img
+                        className="opponentIcon"
+                        src={opponent.image}
+                        alt={opponent.name}
+                        />
+
+                        <div className="opponentRemaining">
+                        残り{cpuHands[opponentIndex].length}枚
+                        </div>
+                    </section>
+                    );
+                })}
             </section>
 
           <section className="board">
@@ -725,7 +761,13 @@ function Sevens({
               </div>
             </div>
 
-            <div className="actionButtons">
+            <div
+                className={`actionButtons ${
+                    openingDone && currentPlayerIndex === 0
+                    ? "playerTurn"
+                    : ""
+                }`}
+            >
               <button
                 type="button"
                 className="playCardButton"
