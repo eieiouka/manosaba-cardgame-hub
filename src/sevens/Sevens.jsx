@@ -283,6 +283,7 @@ function Sevens({
   hands,
   openingSevens,
   firstPlayerIndex,
+  onRestart,
 }) {
   const playerHand = hands[0] ?? [];
   const initialCpuHands = [
@@ -1060,17 +1061,7 @@ useEffect(() => {
   };
 
     const restartGame = () => {
-        setBoard(emptyBoard);
-        setHand(playerHand);
-        setCpuHands(initialCpuHands);
-        setSelectedCard(null);
-        setPasses(3);
-        setCpuPasses([3, 3, 3]);
-        setFlyingCards([]);
-        setBurstPlayers([]);
-        setCurrentPlayerIndex(firstPlayerIndex);
-        setWinnerIndex(null);
-        setOpeningDone(false);
+        onRestart();
     };
 
   return (
