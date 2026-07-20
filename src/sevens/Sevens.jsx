@@ -514,6 +514,7 @@ function Sevens({
                     card.rank !== playedCard.rank,
                 );
 
+                // 飛行開始前にCPUの手札から消す
                 setCpuHands((currentCpuHands) =>
                     currentCpuHands.map(
                     (currentCpuHand, index) =>
@@ -523,18 +524,32 @@ function Sevens({
                     ),
                 );
 
-                setBoard((currentBoard) => ({
-                    ...currentBoard,
-                    [playedCard.suit]: [
-                    ...currentBoard[playedCard.suit],
-                    playedCard.rank,
-                    ],
-                }));
+                animateCardToBoard({
+                    card: playedCard,
+                    ownerIndex: currentPlayerIndex,
 
-                if (nextCpuHand.length === 0) {
-                    setWinnerIndex(currentPlayerIndex);
-                    return;
-                }
+                    onLanding: () => {
+                    // 到着後に盤面へ置く
+                    setBoard((currentBoard) => ({
+                        ...currentBoard,
+                        [playedCard.suit]: [
+                        ...currentBoard[playedCard.suit],
+                        playedCard.rank,
+                        ],
+                    }));
+
+                    if (nextCpuHand.length === 0) {
+                        setWinnerIndex(currentPlayerIndex);
+                        return;
+                    }
+
+                    setCurrentPlayerIndex(
+                        getNextPlayerIndex(currentPlayerIndex),
+                    );
+                    },
+                });
+
+                return;
             }
 
             if (action.type === "pass") {
@@ -585,7 +600,52 @@ function Sevens({
     });
   }, [hand]);
 
+  const animateCardToBoard = ({
+    card,
+    ownerIndex,
+    onLanding,
+    }) => {
+    const tableElement = tableRef.current;
+
+    const targetElement =
+        tableElement?.querySelector(
+        `[data-board-suit="${card.suit}"][data-board-rank="${card.rank}"]`,
+        );
+
+    if (!tableElement || !targetElement) {
+        onLanding();
+        return;
+    }
+
+    const targetCenter =
+        getElementCenterRelativeTo(
+        targetElement,
+        tableElement,
+        );
+
+    if (!targetCenter) {
+        onLanding();
+        return;
+    }
+
+    setFlyingCard({
+        ...card,
+        ownerIndex,
+        targetLeft: targetCenter.left,
+        targetTop: targetCenter.top,
+    });
+
+    window.setTimeout(() => {
+        setFlyingCard(null);
+        onLanding();
+    }, 600);
+    };
+
   const selectCard = (card) => {
+    if (flyingCard) {
+        return;
+    }
+
     if (!openingDone) {
         return;
     }
@@ -602,7 +662,15 @@ function Sevens({
   };
 
   const playCard = () => {
+    if (flyingCard) {
+        return;
+    }
+
     if (!openingDone) {
+        return;
+    }
+
+    if (winnerIndex !== null) {
         return;
     }
 
@@ -611,42 +679,57 @@ function Sevens({
     }
 
     if (!selectedCard) {
-      return;
-    }
-
-    if (!isPlayable(selectedCard, board)) {
-      setSelectedCard(null);
-      return;
-    }
-
-    setBoard((currentBoard) => ({
-      ...currentBoard,
-      [selectedCard.suit]: [
-        ...currentBoard[selectedCard.suit],
-        selectedCard.rank,
-      ],
-    }));
-
-    const nextHand = hand.filter(
-        (card) =>
-            card.suit !== selectedCard.suit ||
-            card.rank !== selectedCard.rank,
-    );
-
-    setHand(nextHand);
-    setSelectedCard(null);
-
-    if (nextHand.length === 0) {
-        setWinnerIndex(0);
         return;
     }
 
-    setCurrentPlayerIndex(
-        getNextPlayerIndex(currentPlayerIndex),
+    if (!isPlayable(selectedCard, board)) {
+        setSelectedCard(null);
+        return;
+    }
+
+    const playedCard = selectedCard;
+
+    const nextHand = hand.filter(
+        (card) =>
+        card.suit !== playedCard.suit ||
+        card.rank !== playedCard.rank,
     );
-  };
+
+    // 飛行開始前に手札から消す
+    setHand(nextHand);
+    setSelectedCard(null);
+
+    animateCardToBoard({
+        card: playedCard,
+        ownerIndex: 0,
+
+        onLanding: () => {
+        // 到着後に盤面へ置く
+        setBoard((currentBoard) => ({
+            ...currentBoard,
+            [playedCard.suit]: [
+            ...currentBoard[playedCard.suit],
+            playedCard.rank,
+            ],
+        }));
+
+        if (nextHand.length === 0) {
+            setWinnerIndex(0);
+            return;
+        }
+
+        setCurrentPlayerIndex(
+            getNextPlayerIndex(0),
+        );
+        },
+    });
+    };
 
   const passTurn = () => {
+    if (flyingCard) {
+        return;
+    }
+
     if (!openingDone) {
         return;
     }
@@ -746,9 +829,9 @@ function Sevens({
                     }}
                 >
                     <PlayingCard
-                    suit={flyingCard.suit}
-                    rank={7}
-                    small
+                        suit={flyingCard.suit}
+                        rank={flyingCard.rank}
+                        small
                     />
                 </div>
                 )}
@@ -908,6 +991,7 @@ function Sevens({
                 className="playCardButton"
                 onClick={playCard}
                 disabled={
+                !!flyingCard ||
                 !openingDone ||
                 currentPlayerIndex !== 0 ||
                 !selectedCard
@@ -921,6 +1005,7 @@ function Sevens({
                 className="passButton"
                 onClick={passTurn}
                 disabled={
+                !!flyingCard ||
                 !openingDone ||
                 currentPlayerIndex !== 0 ||
                 passes <= 0
