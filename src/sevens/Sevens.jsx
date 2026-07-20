@@ -224,6 +224,27 @@ function EmptyCardSlot({
   );
 }
 
+function getElementCenterRelativeTo(element, ancestor) {
+  let left = 0;
+  let top = 0;
+  let currentElement = element;
+
+  while (currentElement && currentElement !== ancestor) {
+    left += currentElement.offsetLeft;
+    top += currentElement.offsetTop;
+    currentElement = currentElement.offsetParent;
+  }
+
+  if (currentElement !== ancestor) {
+    return null;
+  }
+
+  return {
+    left: left + element.offsetWidth / 2,
+    top: top + element.offsetHeight / 2,
+  };
+}
+
 function Sevens({
   navigate,
   hands,
@@ -251,12 +272,6 @@ function Sevens({
     useState(null);
 
   const tableRef = useRef(null);
-
-  const [flyingTarget, setFlyingTarget] =
-    useState({
-      left: 0,
-      top: 0,
-    });
 
   useEffect(() => {
     const updateGameScale = () => {
@@ -347,41 +362,20 @@ function Sevens({
                 return;
             }
 
-            const tableRect =
-                tableElement.getBoundingClientRect();
+            const targetCenter =
+                getElementCenterRelativeTo(
+                  targetElement,
+                  tableElement,
+                );
 
-            const targetRect =
-                targetElement.getBoundingClientRect();
-
-            setFlyingTarget({
-                left:
-                (targetRect.left -
-                    tableRect.left +
-                    targetRect.width / 2) /
-                gameScale,
-
-                top:
-                (targetRect.top -
-                    tableRect.top +
-                    targetRect.height / 2) /
-                gameScale,
-            });
+            if (!targetCenter) {
+              return;
+            }
 
             setFlyingCard({
-                ...card,
-                target: {
-                    left:
-                    (targetRect.left -
-                        tableRect.left +
-                        targetRect.width / 2) /
-                    gameScale,
-
-                    top:
-                    (targetRect.top -
-                        tableRect.top +
-                        targetRect.height / 2) /
-                    gameScale,
-                },
+              ...card,
+              targetLeft: targetCenter.left,
+              targetTop: targetCenter.top,
             });
         }, index * launchInterval);
 
@@ -604,10 +598,10 @@ function Sevens({
                         ]?.top ?? "50%",
 
                     "--opening-end-left":
-                    `${flyingCard.target.left}px`,
+                        `${flyingCard.targetLeft}px`,
 
-                    "--opening-end-top":
-                    `${flyingCard.target.top}px`,
+                        "--opening-end-top":
+                        `${flyingCard.targetTop}px`,
                     }}
                 >
                     <PlayingCard

@@ -338,7 +338,7 @@ body,
 .emptyCardSlot {
   width: 100%;
   height: auto;
-  aspect-ratio: 58 / 84;
+  aspect-ratio: 2 / 3;
 
   display: flex;
   justify-content: center;
