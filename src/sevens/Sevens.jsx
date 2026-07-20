@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import "./Sevens.css";
 
 const GAME_WIDTH = 1500;
@@ -33,6 +39,44 @@ const emptyBoard = {
     hearts: [],
     diamonds: [],
     clubs: [],
+};
+
+const openingSourcePositions = {
+  0: {
+    left: "50%",
+    top: "91%",
+  },
+  1: {
+    left: "17%",
+    top: "5%",
+  },
+  2: {
+    left: "50%",
+    top: "5%",
+  },
+  3: {
+    left: "83%",
+    top: "5%",
+  },
+};
+
+const openingTargetPositions = {
+  spades: {
+    left: "52%",
+    top: "25%",
+  },
+  hearts: {
+    left: "52%",
+    top: "39%",
+  },
+  diamonds: {
+    left: "52%",
+    top: "53%",
+  },
+  clubs: {
+    left: "52%",
+    top: "67%",
+  },
 };
 
 const opponents = [
@@ -162,12 +206,18 @@ function PlayingCard({
   );
 }
 
-function EmptyCardSlot({ rank, playable = false }) {
+function EmptyCardSlot({
+  suit,
+  rank,
+  playable = false,
+}) {
   return (
     <div
       className={`emptyCardSlot ${
         playable ? "playableEmptySlot" : ""
       }`}
+      data-board-suit={suit}
+      data-board-rank={rank}
     >
       {getRankLabel(rank)}
     </div>
@@ -196,6 +246,17 @@ function Sevens({
 
   const [openingDone, setOpeningDone] =
     useState(false);
+
+  const [flyingCard, setFlyingCard] =
+    useState(null);
+
+  const tableRef = useRef(null);
+
+  const [flyingTarget, setFlyingTarget] =
+    useState({
+      left: 0,
+      top: 0,
+    });
 
   useEffect(() => {
     const updateGameScale = () => {
@@ -239,6 +300,151 @@ function Sevens({
     };
   }, []);
 
+  useEffect(() => {
+    if (openingDone) {
+        return undefined;
+    }
+
+    if (!openingSevens || openingSevens.length === 0) {
+        setCurrentPlayerIndex(firstPlayerIndex);
+        setOpeningDone(true);
+        return undefined;
+    }
+
+    let cancelled = false;
+    const timers = [];
+
+    const suitOrder = {
+        spades: 0,
+        hearts: 1,
+        diamonds: 2,
+        clubs: 3,
+    };
+
+    const orderedSevens = [...openingSevens].sort(
+        (cardA, cardB) =>
+        suitOrder[cardA.suit] -
+        suitOrder[cardB.suit],
+    );
+
+    const launchInterval = 950;
+    const flightDuration = 700;
+
+    orderedSevens.forEach((card, index) => {
+        const launchTimer = window.setTimeout(() => {
+            if (cancelled) {
+                return;
+            }
+
+            const tableElement = tableRef.current;
+
+            const targetElement =
+                tableElement?.querySelector(
+                `[data-board-suit="${card.suit}"][data-board-rank="7"]`,
+                );
+
+            if (!tableElement || !targetElement) {
+                return;
+            }
+
+            const tableRect =
+                tableElement.getBoundingClientRect();
+
+            const targetRect =
+                targetElement.getBoundingClientRect();
+
+            setFlyingTarget({
+                left:
+                (targetRect.left -
+                    tableRect.left +
+                    targetRect.width / 2) /
+                gameScale,
+
+                top:
+                (targetRect.top -
+                    tableRect.top +
+                    targetRect.height / 2) /
+                gameScale,
+            });
+
+            setFlyingCard({
+                ...card,
+                target: {
+                    left:
+                    (targetRect.left -
+                        tableRect.left +
+                        targetRect.width / 2) /
+                    gameScale,
+
+                    top:
+                    (targetRect.top -
+                        tableRect.top +
+                        targetRect.height / 2) /
+                    gameScale,
+                },
+            });
+        }, index * launchInterval);
+
+        const landingTimer = window.setTimeout(() => {
+        if (cancelled) {
+            return;
+        }
+
+        setBoard((currentBoard) => {
+            if (currentBoard[card.suit]?.includes(7)) {
+            return currentBoard;
+            }
+
+            return {
+            ...currentBoard,
+            [card.suit]: [
+                ...currentBoard[card.suit],
+                7,
+            ],
+            };
+        });
+
+        if (card.ownerIndex === 0) {
+            setHand((currentHand) =>
+            currentHand.filter(
+                (handCard) =>
+                handCard.suit !== card.suit ||
+                handCard.rank !== 7,
+            ),
+            );
+        }
+
+        setFlyingCard(null);
+        }, index * launchInterval + flightDuration);
+
+        timers.push(launchTimer, landingTimer);
+    });
+
+    const finishTimer = window.setTimeout(() => {
+        if (cancelled) {
+        return;
+        }
+
+        setFlyingCard(null);
+        setCurrentPlayerIndex(firstPlayerIndex);
+        setOpeningDone(true);
+    }, orderedSevens.length * launchInterval + 100);
+
+    timers.push(finishTimer);
+
+    return () => {
+        cancelled = true;
+
+        timers.forEach((timer) => {
+        window.clearTimeout(timer);
+        });
+    };
+    }, [
+    openingDone,
+    openingSevens,
+    firstPlayerIndex,
+    ]);
+
   const sortedHand = useMemo(() => {
     const suitOrder = {
       spades: 1,
@@ -260,14 +466,30 @@ function Sevens({
   }, [hand]);
 
   const selectCard = (card) => {
+    if (!openingDone) {
+        return;
+    }
+
+    if (currentPlayerIndex !== 0) {
+        return;
+    }
+
     if (!isPlayable(card, board)) {
-      return;
+        return;
     }
 
     setSelectedCard(card);
   };
 
   const playCard = () => {
+    if (!openingDone) {
+        return;
+    }
+
+    if (currentPlayerIndex !== 0) {
+        return;
+    }
+
     if (!selectedCard) {
       return;
     }
@@ -297,6 +519,14 @@ function Sevens({
   };
 
   const passTurn = () => {
+    if (!openingDone) {
+        return;
+    }
+
+    if (currentPlayerIndex !== 0) {
+        return;
+    }
+
     if (passes <= 0) {
       return;
     }
@@ -310,6 +540,7 @@ function Sevens({
     setHand(playerHand);
     setSelectedCard(null);
     setPasses(3);
+    setFlyingCard(null);
     setCurrentPlayerIndex(firstPlayerIndex);
     setOpeningDone(false);
     };
@@ -353,7 +584,39 @@ function Sevens({
           </button>
         </header>
 
-        <section className="sevensTable">
+        <section
+            ref={tableRef}
+            className="sevensTable"
+        >
+            {flyingCard && (
+                <div
+                    key={flyingCard.id}
+                    className="openingFlyingCard"
+                    style={{
+                    "--opening-start-left":
+                        openingSourcePositions[
+                        flyingCard.ownerIndex
+                        ]?.left ?? "50%",
+
+                    "--opening-start-top":
+                        openingSourcePositions[
+                        flyingCard.ownerIndex
+                        ]?.top ?? "50%",
+
+                    "--opening-end-left":
+                    `${flyingCard.target.left}px`,
+
+                    "--opening-end-top":
+                    `${flyingCard.target.top}px`,
+                    }}
+                >
+                    <PlayingCard
+                    suit={flyingCard.suit}
+                    rank={7}
+                    small
+                    />
+                </div>
+                )}
             <section className="opponentsTopRow" aria-label="対戦相手">
                 {opponents.map((opponent) => (
                 <section
@@ -413,6 +676,7 @@ function Sevens({
                     return (
                       <EmptyCardSlot
                         key={`${suit.id}-${rank}`}
+                        suit={suit.id}
                         rank={rank}
                         playable={playableSlot}
                       />
@@ -430,7 +694,10 @@ function Sevens({
             >
               <div className="playerHandTrack">
                 {sortedHand.map((card, index) => {
-                  const playable = isPlayable(card, board);
+                  const playable =
+                    openingDone &&
+                    currentPlayerIndex === 0 &&
+                    isPlayable(card, board);
 
                   const selected =
                     selectedCard?.suit === card.suit &&
@@ -447,13 +714,17 @@ function Sevens({
                         "--hand-index": index,
                         zIndex: index + 1,
                       }}
-                      onClick={() => {
-                        if (selected) {
-                          playCard();
-                        } else {
-                          selectCard(card);
+                      onClick={
+                        playable
+                            ? () => {
+                                if (selected) {
+                                playCard();
+                                } else {
+                                selectCard(card);
+                                }
+                            }
+                            : undefined
                         }
-                      }}
                     />
                   );
                 })}
@@ -465,7 +736,11 @@ function Sevens({
                 type="button"
                 className="playCardButton"
                 onClick={playCard}
-                disabled={!selectedCard}
+                disabled={
+                !openingDone ||
+                currentPlayerIndex !== 0 ||
+                !selectedCard
+                }
               >
                 カードを出す
               </button>
@@ -474,7 +749,11 @@ function Sevens({
                 type="button"
                 className="passButton"
                 onClick={passTurn}
-                disabled={passes <= 0}
+                disabled={
+                !openingDone ||
+                currentPlayerIndex !== 0 ||
+                passes <= 0
+                }
               >
                 パス 残り{passes}回
               </button>
