@@ -135,16 +135,31 @@ function getRankLabel(rank) {
 }
 
 function isPlayable(card, board) {
-  const playedCards = board[card.suit];
+  const playedCards = board[card.suit] ?? [];
+  const playedRankSet = new Set(playedCards);
 
-  if (!playedCards || playedCards.length === 0) {
+  // 7がまだ置かれていない列では、7だけを出せる
+  if (!playedRankSet.has(7)) {
     return card.rank === 7;
   }
 
-  const lowest = Math.min(...playedCards);
-  const highest = Math.max(...playedCards);
+  // バーストで離れた位置に置かれた札は無視し、
+  // 7から連続してつながっている範囲だけを調べる
+  let connectedLowest = 7;
+  let connectedHighest = 7;
 
-  return card.rank === lowest - 1 || card.rank === highest + 1;
+  while (playedRankSet.has(connectedLowest - 1)) {
+    connectedLowest -= 1;
+  }
+
+  while (playedRankSet.has(connectedHighest + 1)) {
+    connectedHighest += 1;
+  }
+
+  return (
+    card.rank === connectedLowest - 1 ||
+    card.rank === connectedHighest + 1
+  );
 }
 
 function getNextPlayerIndex(
@@ -566,8 +581,28 @@ function Sevens({
                 remainingPasses,
             });
 
-            if (action.type === "play") {
-                const playedCard = action.card;
+            // CPU側の判定が古くても、実際に出す直前に
+            // 7から連続してつながっているカードかを必ず再確認する
+            const playableCpuCards = cpuHand.filter((card) =>
+                isPlayable(card, board),
+            );
+
+            const validatedAction =
+                action.type === "play" &&
+                action.card &&
+                isPlayable(action.card, board)
+                    ? action
+                    : playableCpuCards.length > 0
+                        ? {
+                            type: "play",
+                            card: playableCpuCards[0],
+                        }
+                        : {
+                            type: "pass",
+                        };
+
+            if (validatedAction.type === "play") {
+                const playedCard = validatedAction.card;
 
                 const nextCpuHand = cpuHand.filter(
                     (card) =>
@@ -616,7 +651,7 @@ function Sevens({
                 return;
             }
 
-            if (action.type === "pass") {
+            if (validatedAction.type === "pass") {
             setCpuPasses((currentCpuPasses) =>
                 currentCpuPasses.map(
                 (remaining, index) =>
