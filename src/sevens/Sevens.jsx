@@ -13,6 +13,30 @@ const GAME_WIDTH = 1500;
 const GAME_HEIGHT = 1220;
 const PAGE_PADDING = 16;
 
+function calculateGameScale() {
+  const viewportWidth =
+    window.visualViewport?.width ?? window.innerWidth;
+
+  const viewportHeight =
+    window.visualViewport?.height ?? window.innerHeight;
+
+  const availableWidth = Math.max(
+    viewportWidth - PAGE_PADDING * 2,
+    1,
+  );
+
+  const availableHeight = Math.max(
+    viewportHeight - PAGE_PADDING * 2,
+    1,
+  );
+
+  return Math.min(
+    availableWidth / GAME_WIDTH,
+    availableHeight / GAME_HEIGHT,
+    1,
+  );
+}
+
 const suits = [
   {
     id: "spades",
@@ -311,7 +335,9 @@ function Sevens({
     3,
   ]);
 
-  const [gameScale, setGameScale] = useState(1);
+  const [gameScale, setGameScale] = useState(
+    calculateGameScale,
+  );
 
   const [openingDone, setOpeningDone] =
     useState(false);
@@ -329,27 +355,7 @@ function Sevens({
 
   useEffect(() => {
     const updateGameScale = () => {
-      const viewportWidth =
-        window.visualViewport?.width ?? window.innerWidth;
-      const viewportHeight =
-        window.visualViewport?.height ?? window.innerHeight;
-
-      const availableWidth = Math.max(
-        viewportWidth - PAGE_PADDING * 2,
-        1,
-      );
-      const availableHeight = Math.max(
-        viewportHeight - PAGE_PADDING * 2,
-        1,
-      );
-
-      const nextScale = Math.min(
-        availableWidth / GAME_WIDTH,
-        availableHeight / GAME_HEIGHT,
-        1,
-      );
-
-      setGameScale(nextScale);
+      setGameScale(calculateGameScale());
     };
 
     updateGameScale();
@@ -588,19 +594,39 @@ function Sevens({
                 isPlayable(card, board),
             );
 
-            const validatedAction =
+            let validatedAction;
+
+            if (
                 action.type === "play" &&
                 action.card &&
                 isPlayable(action.card, board)
-                    ? action
-                    : playableCpuCards.length > 0
-                        ? {
-                            type: "play",
-                            card: playableCpuCards[0],
-                        }
-                        : {
-                            type: "pass",
-                        };
+            ) {
+                validatedAction = action;
+            }
+            else if (
+                action.type === "pass" &&
+                remainingPasses > 0
+            ) {
+                // AIが戦略的にパスを選択した
+                validatedAction = action;
+            }
+            else if (playableCpuCards.length > 0) {
+                // 不正なカードだけ補正する
+                validatedAction = {
+                    type: "play",
+                    card: playableCpuCards[0],
+                };
+            }
+            else if (remainingPasses > 0) {
+                validatedAction = {
+                    type: "pass",
+                };
+            }
+            else {
+                validatedAction = {
+                    type: "none",
+                };
+            }
 
             if (validatedAction.type === "play") {
                 const playedCard = validatedAction.card;
