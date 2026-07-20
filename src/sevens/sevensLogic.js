@@ -29,3 +29,34 @@ export function dealCards(playerCount = 4) {
 
   return hands;
 }
+
+export function setupSevensGame(playerCount = 4) {
+  const hands = dealCards(playerCount);
+
+  const openingSevens = [];
+
+  let firstPlayerIndex = 0;
+
+  hands.forEach((hand, playerIndex) => {
+    hand.forEach((card) => {
+      if (card.rank !== 7) {
+        return;
+      }
+
+      openingSevens.push({
+        ...card,
+        ownerIndex: playerIndex,
+      });
+
+      if (card.suit === "diamonds") {
+        firstPlayerIndex = playerIndex;
+      }
+    });
+  });
+
+  return {
+    hands,
+    openingSevens,
+    firstPlayerIndex,
+  };
+}

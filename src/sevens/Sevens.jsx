@@ -28,11 +28,11 @@ const suits = [
   },
 ];
 
-const initialBoard = {
-  spades: [7],
-  hearts: [7],
-  diamonds: [7],
-  clubs: [7],
+const emptyBoard = {
+    spades: [],
+    hearts: [],
+    diamonds: [],
+    clubs: [],
 };
 
 const opponents = [
@@ -174,16 +174,28 @@ function EmptyCardSlot({ rank, playable = false }) {
   );
 }
 
-function Sevens({ navigate, hands }) {
-    const playerHand = hands[0] ?? [];
-    const cpu1Hand = hands[1] ?? [];
-    const cpu2Hand = hands[2] ?? [];
-    const cpu3Hand = hands[3] ?? [];
-    const [board, setBoard] = useState(initialBoard);
-    const [hand, setHand] = useState(playerHand);
-    const [selectedCard, setSelectedCard] = useState(null);
-    const [passes, setPasses] = useState(3);
-    const [gameScale, setGameScale] = useState(1);
+function Sevens({
+  navigate,
+  hands,
+  openingSevens,
+  firstPlayerIndex,
+}) {
+  const playerHand = hands[0] ?? [];
+  const cpu1Hand = hands[1] ?? [];
+  const cpu2Hand = hands[2] ?? [];
+  const cpu3Hand = hands[3] ?? [];
+
+  const [board, setBoard] = useState(emptyBoard);
+  const [hand, setHand] = useState(playerHand);
+  const [currentPlayerIndex, setCurrentPlayerIndex] =
+    useState(firstPlayerIndex);
+
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [passes, setPasses] = useState(3);
+  const [gameScale, setGameScale] = useState(1);
+
+  const [openingDone, setOpeningDone] =
+    useState(false);
 
   useEffect(() => {
     const updateGameScale = () => {
@@ -294,10 +306,12 @@ function Sevens({ navigate, hands }) {
   };
 
     const restartGame = () => {
-    setBoard(initialBoard);
+    setBoard(emptyBoard);
     setHand(playerHand);
     setSelectedCard(null);
     setPasses(3);
+    setCurrentPlayerIndex(firstPlayerIndex);
+    setOpeningDone(false);
     };
 
   return (
