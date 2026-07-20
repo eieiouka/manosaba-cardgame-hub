@@ -1,0 +1,179 @@
+.resultScreenOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+
+  animation: resultOverlayAppear 0.45s ease forwards;
+}
+
+.resultScreenPanel {
+  position: relative;
+
+  width: 620px;
+  min-height: 390px;
+  padding: 58px 50px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  border: 3px solid #e6c66c;
+  border-radius: 28px;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(43, 76, 68, 0.98),
+      rgba(8, 28, 29, 0.99)
+    );
+
+  box-shadow:
+    0 0 0 7px rgba(230, 198, 108, 0.15),
+    0 0 55px rgba(230, 198, 108, 0.4),
+    0 28px 70px rgba(0, 0, 0, 0.65);
+
+  transform-origin: center;
+
+  animation: resultPanelAppear 0.55s
+    cubic-bezier(0.18, 0.85, 0.32, 1.25)
+    forwards;
+}
+
+.resultScreenPanel::before,
+.resultScreenPanel::after {
+  content: "◆";
+
+  position: absolute;
+  top: 28px;
+
+  color: #e6c66c;
+
+  font-size: 30px;
+  text-shadow:
+    0 0 15px rgba(230, 198, 108, 0.9);
+}
+
+.resultScreenPanel::before {
+  left: 34px;
+}
+
+.resultScreenPanel::after {
+  right: 34px;
+}
+
+.resultScreenLabel {
+  margin: 0 0 12px;
+
+  color: rgba(255, 255, 255, 0.65);
+
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+}
+
+.resultScreenTitle {
+  margin: 0;
+
+  color: #f7df91;
+
+  font-family: "Cormorant Garamond", serif;
+  font-size: 86px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.06em;
+
+  text-shadow:
+    0 0 12px rgba(247, 223, 145, 0.75),
+    0 0 34px rgba(230, 198, 108, 0.45);
+}
+
+.resultScreenPanel.playerDefeat
+  .resultScreenTitle {
+  color: #ff6472;
+
+  text-shadow:
+    0 0 12px rgba(255, 70, 85, 0.75),
+    0 0 34px rgba(255, 40, 55, 0.4);
+}
+
+.resultScreenWinner {
+  margin: 25px 0 35px;
+
+  color: #fff;
+
+  font-size: 30px;
+  font-weight: 800;
+
+  text-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.55);
+}
+
+.resultRestartButton {
+  min-width: 250px;
+  padding: 18px 34px;
+
+  border: 2px solid #e6c66c;
+  border-radius: 12px;
+
+  color: #241d0e;
+  background: #e6c66c;
+
+  font-size: 24px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 0 20px rgba(230, 198, 108, 0.3);
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+
+.resultRestartButton:hover {
+  transform: translateY(-3px) scale(1.03);
+  filter: brightness(1.08);
+
+  box-shadow:
+    0 0 30px rgba(230, 198, 108, 0.65);
+}
+
+.resultRestartButton:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@keyframes resultOverlayAppear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes resultPanelAppear {
+  from {
+    opacity: 0;
+    transform:
+      translateY(50px)
+      scale(0.75);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}

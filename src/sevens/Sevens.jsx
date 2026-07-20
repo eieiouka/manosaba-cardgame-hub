@@ -6,6 +6,7 @@ import {
 } from "react";
 
 import { chooseCpuAction } from "./sevensCpu";
+import ResultScreen from "./ResultScreen";
 import "./Sevens.css";
 
 const GAME_WIDTH = 1500;
@@ -290,6 +291,9 @@ function Sevens({
   const [flyingCard, setFlyingCard] =
     useState(null);
 
+  const [winnerIndex, setWinnerIndex] =
+    useState(null);
+
   const tableRef = useRef(null);
 
   useEffect(() => {
@@ -481,6 +485,10 @@ function Sevens({
             return undefined;
         }
 
+        if (winnerIndex !== null) {
+            return undefined;
+        }
+
         if (currentPlayerIndex === 0) {
             return undefined;
         }
@@ -498,31 +506,35 @@ function Sevens({
             });
 
             if (action.type === "play") {
-            const playedCard = action.card;
+                const playedCard = action.card;
 
-            setCpuHands((currentCpuHands) =>
-                currentCpuHands.map(
-                (currentCpuHand, index) => {
-                    if (index !== cpuIndex) {
-                    return currentCpuHand;
-                    }
-
-                    return currentCpuHand.filter(
+                const nextCpuHand = cpuHand.filter(
                     (card) =>
-                        card.suit !== playedCard.suit ||
-                        card.rank !== playedCard.rank,
-                    );
-                },
-                ),
-            );
+                    card.suit !== playedCard.suit ||
+                    card.rank !== playedCard.rank,
+                );
 
-            setBoard((currentBoard) => ({
-                ...currentBoard,
-                [playedCard.suit]: [
-                ...currentBoard[playedCard.suit],
-                playedCard.rank,
-                ],
-            }));
+                setCpuHands((currentCpuHands) =>
+                    currentCpuHands.map(
+                    (currentCpuHand, index) =>
+                        index === cpuIndex
+                        ? nextCpuHand
+                        : currentCpuHand,
+                    ),
+                );
+
+                setBoard((currentBoard) => ({
+                    ...currentBoard,
+                    [playedCard.suit]: [
+                    ...currentBoard[playedCard.suit],
+                    playedCard.rank,
+                    ],
+                }));
+
+                if (nextCpuHand.length === 0) {
+                    setWinnerIndex(currentPlayerIndex);
+                    return;
+                }
             }
 
             if (action.type === "pass") {
@@ -550,6 +562,7 @@ function Sevens({
         board,
         cpuHands,
         cpuPasses,
+        winnerIndex,
     ]);
 
   const sortedHand = useMemo(() => {
@@ -614,17 +627,22 @@ function Sevens({
       ],
     }));
 
-    setHand((currentHand) =>
-      currentHand.filter(
+    const nextHand = hand.filter(
         (card) =>
-          card.suit !== selectedCard.suit ||
-          card.rank !== selectedCard.rank,
-      ),
+            card.suit !== selectedCard.suit ||
+            card.rank !== selectedCard.rank,
     );
 
+    setHand(nextHand);
     setSelectedCard(null);
+
+    if (nextHand.length === 0) {
+        setWinnerIndex(0);
+        return;
+    }
+
     setCurrentPlayerIndex(
-      getNextPlayerIndex(currentPlayerIndex),
+        getNextPlayerIndex(currentPlayerIndex),
     );
   };
 
@@ -658,6 +676,7 @@ function Sevens({
         setCpuPasses([3, 3, 3]);
         setFlyingCard(null);
         setCurrentPlayerIndex(firstPlayerIndex);
+        setWinnerIndex(null);
         setOpeningDone(false);
     };
 
@@ -912,6 +931,13 @@ function Sevens({
             </div>
           </section>
         </section>
+
+        {winnerIndex !== null && (
+          <ResultScreen
+            winnerIndex={winnerIndex}
+            onRestart={restartGame}
+          />
+        )}
         </div>
       </div>
     </main>
