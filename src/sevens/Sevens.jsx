@@ -351,6 +351,10 @@ function Sevens({
   const [winnerIndex, setWinnerIndex] =
     useState(null);
 
+  const [turnSeconds, setTurnSeconds] = useState(3);
+  const playerTurnCountRef = useRef(0);
+  const forcePlayerActionRef = useRef(null);
+
   const tableRef = useRef(null);
 
   useEffect(() => {
@@ -1003,7 +1007,7 @@ useEffect(() => {
     setSelectedCard(card);
   };
 
-  const playCard = () => {
+  const playCard = (forcedCard = null) => {
     if (flyingCards.length > 0) {
         return;
     }
@@ -1024,16 +1028,16 @@ useEffect(() => {
         return;
     }
 
-    if (!selectedCard) {
+    const playedCard = forcedCard ?? selectedCard;
+
+    if (!playedCard) {
         return;
     }
 
-    if (!isPlayable(selectedCard, board)) {
+    if (!isPlayable(playedCard, board)) {
         setSelectedCard(null);
         return;
     }
-
-    const playedCard = selectedCard;
 
     const nextHand = hand.filter(
         (card) =>
@@ -1044,6 +1048,7 @@ useEffect(() => {
     // 飛行開始前に手札から消す
     setHand(nextHand);
     setSelectedCard(null);
+    playerTurnCountRef.current += 1;
 
     animateCardToBoard({
         card: playedCard,
@@ -1097,6 +1102,7 @@ useEffect(() => {
 
     setPasses((current) => current - 1);
     setSelectedCard(null);
+    playerTurnCountRef.current += 1;
 
     setCurrentPlayerIndex(
         getNextPlayerIndex(
@@ -1105,6 +1111,95 @@ useEffect(() => {
         ),
     );
   };
+
+  forcePlayerActionRef.current = () => {
+    if (
+      flyingCards.length > 0 ||
+      burstPlayers.includes(0) ||
+      !openingDone ||
+      winnerIndex !== null ||
+      currentPlayerIndex !== 0
+    ) {
+      return;
+    }
+
+    const suitOrder = {
+      spades: 1,
+      hearts: 2,
+      diamonds: 3,
+      clubs: 4,
+    };
+
+    const leftmostPlayableCard = [...hand]
+      .sort((cardA, cardB) => {
+        const suitDifference =
+          suitOrder[cardA.suit] - suitOrder[cardB.suit];
+
+        if (suitDifference !== 0) {
+          return suitDifference;
+        }
+
+        return cardA.rank - cardB.rank;
+      })
+      .find((card) => isPlayable(card, board));
+
+    if (leftmostPlayableCard) {
+      playCard(leftmostPlayableCard);
+      return;
+    }
+
+    // 出せるカードがない場合だけ、時間切れを強制パスとして処理する。
+    if (passes > 0) {
+      passTurn();
+    }
+  };
+
+  useEffect(() => {
+    const isPlayerTurn =
+      openingDone &&
+      winnerIndex === null &&
+      currentPlayerIndex === 0 &&
+      !burstPlayers.includes(0) &&
+      flyingCards.length === 0;
+
+    if (!isPlayerTurn) {
+      return undefined;
+    }
+
+    // 最初の自分の手だけは時間制限なし。
+    if (playerTurnCountRef.current === 0) {
+      return undefined;
+    }
+
+    const timeLimit = 3;
+    const deadline = Date.now() + timeLimit * 1000;
+    setTurnSeconds(timeLimit);
+
+    const countdownTimer = window.setInterval(() => {
+      const nextSeconds = Math.max(
+        0,
+        Math.ceil((deadline - Date.now()) / 1000),
+      );
+
+      setTurnSeconds(nextSeconds);
+    }, 100);
+
+    const forceActionTimer = window.setTimeout(() => {
+      setTurnSeconds(0);
+      forcePlayerActionRef.current?.();
+    }, timeLimit * 1000);
+
+    return () => {
+      window.clearInterval(countdownTimer);
+      window.clearTimeout(forceActionTimer);
+    };
+  }, [
+    openingDone,
+    winnerIndex,
+    currentPlayerIndex,
+    burstPlayers,
+    flyingCards.length,
+  ]);
 
     const restartGame = () => {
         onRestart();
@@ -1336,7 +1431,7 @@ useEffect(() => {
               <button
                 type="button"
                 className="playCardButton"
-                onClick={playCard}
+                onClick={() => playCard()}
                 disabled={
                 flyingCards.length > 0 ||
                 burstPlayers.includes(0) ||
@@ -1345,7 +1440,20 @@ useEffect(() => {
                 !selectedCard
                 }
               >
-                カードを出す
+                <span className="playButtonLabel">カードを出す</span>
+                {openingDone && currentPlayerIndex === 0 && (
+                  <>
+                    <strong className="turnCountdown">
+                      {playerTurnCountRef.current === 0
+                        ? "－"
+                        : turnSeconds}
+                    </strong>
+
+                    <span className="turnCountdownUnit">
+                      秒
+                    </span>
+                  </>
+                )}
               </button>
 
               <button
@@ -1360,7 +1468,12 @@ useEffect(() => {
                 passes <= 0
                 }
               >
-                パス 残り{passes}回
+                <span className="passButtonLabel">パス</span>
+                <span className="passRemainingLabel">残り</span>
+                <span className="passCount">
+                  <strong>{passes}</strong>
+                  <small>回</small>
+                </span>
               </button>
             </div>
           </section>

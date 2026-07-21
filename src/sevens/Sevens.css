@@ -637,23 +637,51 @@ body,
 }
 
 .actionButtons button {
+  position: relative;
+
   width: 10.667cqw;
   min-width: 0;
-
   min-height: 10.667cqw;
 
   padding: 0;
+  overflow: hidden;
 
-  border-radius: 0.667cqw;
+  border-radius: 1.2cqw;
 
-  font-size: 1.3cqw;
+  font-family: inherit;
   white-space: nowrap;
 
   cursor: pointer;
 
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    0 0.7cqw 1.4cqw rgba(0, 0, 0, 0.3);
+
   transition:
     opacity 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    filter 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.actionButtons button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.22),
+      transparent 42%,
+      rgba(0, 0, 0, 0.18)
+    );
+}
+
+.actionButtons button:disabled::before {
+    opacity: 0.42;
 }
 
 .actionButtons.playerTurn .passButton:not(:disabled) {
@@ -665,37 +693,166 @@ body,
   100% {
     box-shadow:
       0 0 0 2px rgba(255, 45, 60, 0.45),
-      0 0 8px rgba(255, 45, 60, 0.45);
+      0 0 8px rgba(255, 45, 60, 0.45),
+      0 0.7cqw 1.4cqw rgba(0, 0, 0, 0.3);
   }
 
   50% {
     box-shadow:
       0 0 0 3px rgba(255, 45, 60, 0.9),
-      0 0 18px rgba(255, 45, 60, 1);
+      0 0 18px rgba(255, 45, 60, 1),
+      0 0.7cqw 1.4cqw rgba(0, 0, 0, 0.3);
   }
 }
 
 .actionButtons button:hover:not(:disabled) {
-  transform: translateY(-0.133cqw);
+  transform: translateY(-0.2cqw) scale(1.02);
+  filter: brightness(1.08);
+}
+
+.actionButtons button:active:not(:disabled) {
+  transform: translateY(0.05cqw) scale(0.98);
 }
 
 .actionButtons button:disabled {
-  cursor: default;
-  opacity: 0.45;
+    cursor: default;
 }
 
 .playCardButton {
-  border: 1px solid #f0cb69;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  place-items: center;
 
-  color: #1c1710;
-  background: #f0cb69;
+  border: 1px solid #ffe6a1;
+
+  color: #21180b;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      #fff2af 0%,
+      #f0cb69 48%,
+      #bc8427 100%
+    );
+}
+
+.playButtonLabel {
+  position: relative;
+  z-index: 1;
+
+  margin-top: 0.8cqw;
+
+  font-size: 1.05cqw;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.turnCountdown {
+  position: relative;
+  z-index: 1;
+
+  align-self: center;
+
+  font-family: "Cormorant Garamond", serif;
+  font-size: 5.4cqw;
+  font-weight: 700;
+  line-height: 0.8;
+
+  font-variant-numeric: tabular-nums;
+
+  text-shadow:
+    0 0.12cqw 0 rgba(255, 255, 255, 0.55),
+    0 0.28cqw 0.5cqw rgba(76, 45, 0, 0.24);
+}
+
+.turnCountdownUnit {
+  position: relative;
+  z-index: 1;
+
+  margin-bottom: 0.7cqw;
+
+  font-size: 0.9cqw;
+  font-weight: 800;
+  letter-spacing: 0.12em;
 }
 
 .passButton {
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  display: block;
+
+  border: 1px solid rgba(255, 255, 255, 0.48);
 
   color: #fff;
-  background: rgba(0, 0, 0, 0.3);
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(68, 87, 91, 0.96),
+      rgba(18, 28, 31, 0.98) 72%
+    );
+}
+
+.passButtonLabel {
+  position: absolute;
+  z-index: 1;
+  top: 0.8cqw;
+  left: 0.9cqw;
+
+  font-size: 1.25cqw;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.passRemainingLabel {
+  position: absolute;
+  z-index: 1;
+  top: 3.3cqw;
+  left: 1cqw;
+
+  color: rgba(255, 255, 255, 0.64);
+
+  font-size: 0.8cqw;
+  font-weight: 700;
+}
+
+.passCount {
+  position: absolute;
+  z-index: 1;
+  right: 1.35cqw;
+  bottom: 1.05cqw;
+
+  width: 5cqw;
+  height: 5.5cqw;
+}
+
+.passCount strong {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  color: #f2d06b;
+
+  font-family: "Cormorant Garamond", serif;
+  font-size: 5.2cqw;
+  font-weight: 700;
+  line-height: 1;
+
+  font-variant-numeric: tabular-nums;
+
+  text-shadow:
+    0 0 0.6cqw rgba(242, 208, 107, 0.4),
+    0 0.2cqw 0.3cqw rgba(0, 0, 0, 0.5);
+}
+
+.passCount small {
+  position: absolute;
+  right: -0.2cqw;
+  bottom: -0.05cqw;
+
+  color: rgba(255, 255, 255, 0.92);
+
+  font-size: 1.15cqw;
+  font-weight: 900;
+  line-height: 1;
+
+  transform: rotate(-12deg);
 }
 
 @keyframes playableSlotGlow {
