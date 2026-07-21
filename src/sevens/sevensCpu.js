@@ -394,8 +394,9 @@ function findLinkedCandidates(
         card: firstCard.card,
         suit: direction.suit,
         side: direction.side,
+        handCount: direction.cards.length,
         remaining: direction.remaining,
-      };
+        };
     });
 }
 
@@ -426,11 +427,12 @@ function findEdgeCandidates(
       return direction.cards[0].order === 1;
     })
     .map((direction) => ({
-      type: "play",
-      card: direction.cards[0].card,
-      suit: direction.suit,
-      side: direction.side,
-      remaining: direction.remaining,
+        type: "play",
+        card: direction.cards[0].card,
+        suit: direction.suit,
+        side: direction.side,
+        handCount: direction.cards.length,
+        remaining: direction.remaining,
     }));
 }
 
@@ -442,11 +444,46 @@ function createRandomPlayAction(
   candidates,
   reason,
 ) {
-  const selected = chooseRandom(candidates);
-
-  if (!selected) {
+  if (!candidates || candidates.length === 0) {
     return null;
   }
+
+  // 自分が多く持っている方向を優先
+  const maxHandCount = Math.max(
+    ...candidates.map(
+      (candidate) => candidate.handCount,
+    ),
+  );
+
+  const handPriority = candidates.filter(
+    (candidate) =>
+      candidate.handCount === maxHandCount,
+  );
+
+  // 残り枚数が少ない方向を優先
+  const minRemaining = Math.min(
+    ...handPriority.map(
+      (candidate) => candidate.remaining,
+    ),
+  );
+
+  const finalCandidates = handPriority.filter(
+    (candidate) =>
+      candidate.remaining === minRemaining,
+  );
+
+  console.table(
+    finalCandidates.map((candidate) => ({
+      suit: candidate.suit,
+      side: candidate.side,
+      handCount: candidate.handCount,
+      remaining: candidate.remaining,
+      card: `${candidate.card.suit}-${candidate.card.rank}`,
+    })),
+  );
+
+  const selected =
+    chooseRandom(finalCandidates);
 
   return {
     type: "play",
@@ -531,6 +568,7 @@ export function chooseCpuAction({
   cpuHand,
   board,
   remainingPasses,
+  otherPlayerHandCounts,
 }) {
   const boardAnalysis =
     analyzeCpuBoard(board);
@@ -544,6 +582,21 @@ export function chooseCpuAction({
     handInfo,
     boardAnalysis,
   );
+
+    const playableCards =
+    getCpuPlayableCards(cpuHand, board);
+
+    const hasFewestHand =
+    otherPlayerHandCounts.every(
+        (count) => cpuHand.length <= count,
+    );
+
+    const movePassToLast =
+    hasFewestHand &&
+    playableCards.length === cpuHand.length;
+
+    const isHeadsUp =
+    otherPlayerHandCounts.length === 1;
 
   console.log(
     "CPU盤面観測",
@@ -603,6 +656,17 @@ export function chooseCpuAction({
     return edgeOneAction;
   }
 
+  if (
+    isHeadsUp &&
+    !movePassToLast &&
+    remainingPasses > 0
+    ) {
+    return {
+        type: "pass",
+        reason: "パス",
+    };
+  }
+
   /*
    * 3. 一間飛び
    * 1番目と3番目を持っている。
@@ -632,7 +696,11 @@ export function chooseCpuAction({
    * 上位3条件に該当せず、
    * パスが残っていればパスする。
    */
-  if (remainingPasses > 0) {
+  if (
+    !isHeadsUp &&
+    !movePassToLast &&
+    remainingPasses > 0
+    ) {
     console.log(
       "CPU判断",
       "パス",
@@ -830,8 +898,6 @@ export function chooseCpuAction({
    * 上記のどの条件にも一致しなかった場合は、
    * 現在出せるカードからランダムに出す。
    */
-  const playableCards =
-    getCpuPlayableCards(cpuHand, board);
 
   if (playableCards.length > 0) {
     const fallbackCard =

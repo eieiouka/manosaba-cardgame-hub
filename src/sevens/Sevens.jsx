@@ -582,10 +582,30 @@ function Sevens({
             return;
             }
 
+            const otherPlayerHandCounts = [];
+
+            if (!burstPlayers.includes(0)) {
+                otherPlayerHandCounts.push(hand.length);
+            }
+
+            cpuHands.forEach((otherCpuHand, otherCpuIndex) => {
+                const otherPlayerIndex = otherCpuIndex + 1;
+
+                if (
+                    otherCpuIndex !== cpuIndex &&
+                    !burstPlayers.includes(otherPlayerIndex)
+                ) {
+                    otherPlayerHandCounts.push(
+                        otherCpuHand.length,
+                    );
+                }
+            });
+
             const action = chooseCpuAction({
                 cpuHand,
                 board,
                 remainingPasses,
+                otherPlayerHandCounts,
             });
 
             // CPU側の判定が古くても、実際に出す直前に
