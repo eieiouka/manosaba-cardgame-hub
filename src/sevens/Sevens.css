@@ -984,3 +984,113 @@ body,
   color: rgba(255, 255, 255, 0.2);
   text-shadow: none;
 }
+/* ==============================
+   パス表示ポップアップ
+   JSX の .passPopup に対応。
+   absolute 配置にすることで相手枠を横へ広げない。
+   ============================== */
+
+.opponent {
+  overflow: visible;
+}
+
+.opponent .passPopup {
+  position: absolute;
+  z-index: 20;
+
+  /* アイコンを含むキャラ枠の内側だけを覆う */
+  inset: 5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  width: auto;
+  height: auto;
+  padding: 0;
+
+  border: 1px solid rgba(255, 225, 150, 0.85);
+  border-radius: 42px 11px 11px 42px;
+
+  color: #fff3c4;
+  background: rgba(14, 17, 18, 0.84);
+  backdrop-filter: blur(2px);
+
+  font-size: 1.65cqw;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-indent: 0.16em;
+  white-space: nowrap;
+
+  pointer-events: none;
+
+  text-shadow:
+    0 0 0.45cqw rgba(255, 214, 100, 0.9),
+    0 0.15cqw 0.25cqw rgba(0, 0, 0, 0.8);
+
+  box-shadow:
+    inset 0 0 0.8cqw rgba(255, 215, 105, 0.13),
+    0 0 0.65cqw rgba(255, 205, 75, 0.35);
+
+  animation: passPopupAppear 800ms ease both;
+}
+
+/* 自分のパス表示もボタン領域から横へはみ出させない */
+.actionButtons {
+  position: relative;
+}
+
+.actionButtons .playerPassPopup {
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  width: auto;
+  padding: 0;
+
+  border: 1px solid rgba(255, 225, 150, 0.85);
+  border-radius: 1.2cqw;
+
+  color: #fff3c4;
+  background: rgba(14, 17, 18, 0.88);
+
+  font-size: 1.8cqw;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-indent: 0.16em;
+  white-space: nowrap;
+
+  pointer-events: none;
+
+  text-shadow:
+    0 0 0.45cqw rgba(255, 214, 100, 0.9),
+    0 0.15cqw 0.25cqw rgba(0, 0, 0, 0.8);
+
+  animation: passPopupAppear 800ms ease both;
+}
+
+@keyframes passPopupAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+
+  16%,
+  76% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}

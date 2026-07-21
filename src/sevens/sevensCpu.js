@@ -583,20 +583,25 @@ export function chooseCpuAction({
     boardAnalysis,
   );
 
-    const playableCards =
+  const playableCards =
     getCpuPlayableCards(cpuHand, board);
 
-    const hasFewestHand =
+  const hasFewestHand =
     otherPlayerHandCounts.every(
-        (count) => cpuHand.length <= count,
+      (count) => cpuHand.length <= count,
     );
 
-    const movePassToLast =
+  /*
+   * 自分の手札枚数が他の全員以下で、
+   * 手札のすべてが現在出せる場合は、
+   * 通常位置ではパスせず最後まで回す。
+   */
+  const movePassToLast =
     hasFewestHand &&
     playableCards.length === cpuHand.length;
 
-    const isHeadsUp =
-    otherPlayerHandCounts.length === 1;
+  const remainingPlayerCount =
+    otherPlayerHandCounts.length + 1;
 
   console.log(
     "CPU盤面観測",
@@ -608,99 +613,49 @@ export function chooseCpuAction({
     handInfo,
   );
 
+  console.log(
+    "CPU残り人数",
+    remainingPlayerCount,
+  );
+
   logCpuHandAnalysis(handInfo);
 
-  /*
-   * 1. 階段
-   * 1番目と2番目を持っている。
-   */
-  const staircaseAction =
-    createRandomPlayAction(
-      findLinkedCandidates(
-        directions,
-        2,
-      ),
-      "階段",
+  const returnPlayAction = (
+    candidates,
+    reason,
+  ) => {
+    const action = createRandomPlayAction(
+      candidates,
+      reason,
     );
 
-  if (staircaseAction) {
+    if (!action) {
+      return null;
+    }
+
     console.log(
       "CPU判断",
-      staircaseAction.reason,
-      staircaseAction.card,
+      action.reason,
+      action.card,
     );
 
-    return staircaseAction;
-  }
+    return action;
+  };
 
   /*
-   * 2. 端カード
-   * 残り1枚で、その方向の手札が1枚だけ。
-   */
-  const edgeOneAction =
-    createRandomPlayAction(
-      findEdgeCandidates(
-        directions,
-        1,
-      ),
-      "端カード",
-    );
-
-  if (edgeOneAction) {
-    console.log(
-      "CPU判断",
-      edgeOneAction.reason,
-      edgeOneAction.card,
-    );
-
-    return edgeOneAction;
-  }
-
-  if (
-    isHeadsUp &&
-    !movePassToLast &&
-    remainingPasses > 0
-    ) {
-    return {
-        type: "pass",
-        reason: "パス",
-    };
-  }
-
-  /*
-   * 3. 一間飛び
-   * 1番目と3番目を持っている。
-   */
-  const oneGapAction =
-    createRandomPlayAction(
-      findLinkedCandidates(
-        directions,
-        3,
-      ),
-      "一間飛び",
-    );
-
-  if (oneGapAction) {
-    console.log(
-      "CPU判断",
-      oneGapAction.reason,
-      oneGapAction.card,
-    );
-
-    return oneGapAction;
-  }
-
-  /*
-   * 4. パス
+   * 通常位置でパスを試す。
    *
-   * 上位3条件に該当せず、
-   * パスが残っていればパスする。
+   * movePassToLast が成立している場合と、
+   * パスを使い切っている場合はパスしない。
    */
-  if (
-    !isHeadsUp &&
-    !movePassToLast &&
-    remainingPasses > 0
+  const tryPass = () => {
+    if (
+      movePassToLast ||
+      remainingPasses <= 0
     ) {
+      return null;
+    }
+
     console.log(
       "CPU判断",
       "パス",
@@ -710,13 +665,105 @@ export function chooseCpuAction({
       type: "pass",
       reason: "パス",
     };
+  };
+
+  /*
+   * 1. 階段
+   *
+   * 全人数で常に最優先。
+   */
+  const staircaseAction =
+    returnPlayAction(
+      findLinkedCandidates(
+        directions,
+        2,
+      ),
+      "階段",
+    );
+
+  if (staircaseAction) {
+    return staircaseAction;
   }
 
   /*
-   * 5. 端2カード
+   * 2. 端カード
+   *
+   * あと1枚で端まで到達する候補。
+   */
+  const edgeOneAction =
+    returnPlayAction(
+      findEdgeCandidates(
+        directions,
+        1,
+      ),
+      "端カード",
+    );
+
+  if (edgeOneAction) {
+    return edgeOneAction;
+  }
+
+  /*
+   * 2人残り:
+   *
+   * 階段
+   * ↓
+   * 端カード
+   * ↓
+   * パス
+   */
+  if (remainingPlayerCount === 2) {
+    const passAction = tryPass();
+
+    if (passAction) {
+      return passAction;
+    }
+  }
+
+  /*
+   * 3. 一間飛び
+   *
+   * 1番目と3番目を持っている候補。
+   */
+  const oneGapAction =
+    returnPlayAction(
+      findLinkedCandidates(
+        directions,
+        3,
+      ),
+      "一間飛び",
+    );
+
+  if (oneGapAction) {
+    return oneGapAction;
+  }
+
+  /*
+   * 3人以上残り:
+   *
+   * 階段
+   * ↓
+   * 端カード
+   * ↓
+   * 一間飛び
+   * ↓
+   * パス
+   */
+  if (remainingPlayerCount >= 3) {
+    const passAction = tryPass();
+
+    if (passAction) {
+      return passAction;
+    }
+  }
+
+  /*
+   * 4. 端2カード
+   *
+   * あと2枚で端まで到達する候補。
    */
   const edgeTwoAction =
-    createRandomPlayAction(
+    returnPlayAction(
       findEdgeCandidates(
         directions,
         2,
@@ -725,21 +772,16 @@ export function chooseCpuAction({
     );
 
   if (edgeTwoAction) {
-    console.log(
-      "CPU判断",
-      edgeTwoAction.reason,
-      edgeTwoAction.card,
-    );
-
     return edgeTwoAction;
   }
 
   /*
-   * 6. 二間飛び
-   * 1番目と4番目を持っている。
+   * 5. 二間飛び
+   *
+   * 1番目と4番目を持っている候補。
    */
   const twoGapAction =
-    createRandomPlayAction(
+    returnPlayAction(
       findLinkedCandidates(
         directions,
         4,
@@ -748,20 +790,14 @@ export function chooseCpuAction({
     );
 
   if (twoGapAction) {
-    console.log(
-      "CPU判断",
-      twoGapAction.reason,
-      twoGapAction.card,
-    );
-
     return twoGapAction;
   }
 
   /*
-   * 7. 端3カード
+   * 6. 端3カード
    */
   const edgeThreeAction =
-    createRandomPlayAction(
+    returnPlayAction(
       findEdgeCandidates(
         directions,
         3,
@@ -770,21 +806,14 @@ export function chooseCpuAction({
     );
 
   if (edgeThreeAction) {
-    console.log(
-      "CPU判断",
-      edgeThreeAction.reason,
-      edgeThreeAction.card,
-    );
-
     return edgeThreeAction;
   }
 
   /*
-   * 8. 三間飛び
-   * 1番目と5番目を持っている。
+   * 7. 三間飛び
    */
   const threeGapAction =
-    createRandomPlayAction(
+    returnPlayAction(
       findLinkedCandidates(
         directions,
         5,
@@ -793,20 +822,14 @@ export function chooseCpuAction({
     );
 
   if (threeGapAction) {
-    console.log(
-      "CPU判断",
-      threeGapAction.reason,
-      threeGapAction.card,
-    );
-
     return threeGapAction;
   }
 
   /*
-   * 9. 端4カード
+   * 8. 端4カード
    */
   const edgeFourAction =
-    createRandomPlayAction(
+    returnPlayAction(
       findEdgeCandidates(
         directions,
         4,
@@ -815,21 +838,14 @@ export function chooseCpuAction({
     );
 
   if (edgeFourAction) {
-    console.log(
-      "CPU判断",
-      edgeFourAction.reason,
-      edgeFourAction.card,
-    );
-
     return edgeFourAction;
   }
 
   /*
-   * 10. 四間飛び
-   * 1番目と6番目を持っている。
+   * 9. 四間飛び
    */
   const fourGapAction =
-    createRandomPlayAction(
+    returnPlayAction(
       findLinkedCandidates(
         directions,
         6,
@@ -838,20 +854,14 @@ export function chooseCpuAction({
     );
 
   if (fourGapAction) {
-    console.log(
-      "CPU判断",
-      fourGapAction.reason,
-      fourGapAction.card,
-    );
-
     return fourGapAction;
   }
 
   /*
-   * 11. 端5カード
+   * 10. 端5カード
    */
   const edgeFiveAction =
-    createRandomPlayAction(
+    returnPlayAction(
       findEdgeCandidates(
         directions,
         5,
@@ -860,20 +870,14 @@ export function chooseCpuAction({
     );
 
   if (edgeFiveAction) {
-    console.log(
-      "CPU判断",
-      edgeFiveAction.reason,
-      edgeFiveAction.card,
-    );
-
     return edgeFiveAction;
   }
 
   /*
-   * 12. 端6カード
+   * 11. 端6カード
    */
   const edgeSixAction =
-    createRandomPlayAction(
+    returnPlayAction(
       findEdgeCandidates(
         directions,
         6,
@@ -882,23 +886,31 @@ export function chooseCpuAction({
     );
 
   if (edgeSixAction) {
-    console.log(
-      "CPU判断",
-      edgeSixAction.reason,
-      edgeSixAction.card,
-    );
-
     return edgeSixAction;
   }
 
   /*
-   * 念のための最終処理。
-   *
-   * パスを使い切っていて、
-   * 上記のどの条件にも一致しなかった場合は、
-   * 現在出せるカードからランダムに出す。
+   * movePassToLast が成立している場合のみ、
+   * すべての優先候補を確認した後にパスする。
    */
+  if (
+    movePassToLast &&
+    remainingPasses > 0
+  ) {
+    console.log(
+      "CPU判断",
+      "パス（最後）",
+    );
 
+    return {
+      type: "pass",
+      reason: "パス",
+    };
+  }
+
+  /*
+   * 最終ランダム。
+   */
   if (playableCards.length > 0) {
     const fallbackCard =
       chooseRandom(playableCards);

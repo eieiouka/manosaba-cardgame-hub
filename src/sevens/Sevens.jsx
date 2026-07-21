@@ -352,10 +352,57 @@ function Sevens({
     useState(null);
 
   const [turnSeconds, setTurnSeconds] = useState(3);
+  const [passPopupPlayerIndex, setPassPopupPlayerIndex] = useState(null);
+  const passDelayTimerRef = useRef(null);
   const playerTurnCountRef = useRef(0);
   const forcePlayerActionRef = useRef(null);
 
   const tableRef = useRef(null);
+
+  const passVoiceSources = [
+    null, // 自分の音声を追加するとき: "/audio/player-pass.mp3"
+    null, // 左の相手: "/audio/opponent-left-pass.mp3"
+    null, // 中央の相手: "/audio/opponent-center-pass.mp3"
+    null, // 右の相手: "/audio/opponent-right-pass.mp3"
+  ];
+
+  const playPassVoice = (playerIndex) => {
+    const source = passVoiceSources[playerIndex];
+
+    if (!source) {
+      return;
+    }
+
+    const audio = new Audio(source);
+    audio.play().catch(() => {
+      // ブラウザ側で自動再生が拒否された場合は何もしない
+    });
+  };
+
+  const showPassPopupThenAdvance = (playerIndex) => {
+    setPassPopupPlayerIndex(playerIndex);
+    playPassVoice(playerIndex);
+
+    if (passDelayTimerRef.current !== null) {
+      window.clearTimeout(passDelayTimerRef.current);
+    }
+
+    passDelayTimerRef.current = window.setTimeout(() => {
+      setPassPopupPlayerIndex(null);
+      setCurrentPlayerIndex(
+        getNextPlayerIndex(playerIndex, burstPlayers),
+      );
+      passDelayTimerRef.current = null;
+    }, 800);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (passDelayTimerRef.current !== null) {
+        window.clearTimeout(passDelayTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const updateGameScale = () => {
@@ -548,6 +595,10 @@ function Sevens({
             return undefined;
         }
 
+        if (passPopupPlayerIndex !== null) {
+            return undefined;
+        }
+
         if (burstPlayers.includes(currentPlayerIndex)) {
             setCurrentPlayerIndex(
                 getNextPlayerIndex(
@@ -703,21 +754,24 @@ function Sevens({
             }
 
             if (validatedAction.type === "pass") {
-            setCpuPasses((currentCpuPasses) =>
+              setCpuPasses((currentCpuPasses) =>
                 currentCpuPasses.map(
-                (remaining, index) =>
+                  (remaining, index) =>
                     index === cpuIndex
-                    ? Math.max(0, remaining - 1)
-                    : remaining,
+                      ? Math.max(0, remaining - 1)
+                      : remaining,
                 ),
-            );
+              );
+
+              showPassPopupThenAdvance(currentPlayerIndex);
+              return;
             }
 
             setCurrentPlayerIndex(
-                getNextPlayerIndex(
-                    currentPlayerIndex,
-                    burstPlayers,
-                ),
+              getNextPlayerIndex(
+                currentPlayerIndex,
+                burstPlayers,
+              ),
             );
         }, 10);
 
@@ -733,6 +787,7 @@ function Sevens({
         winnerIndex,
         flyingCards,
         burstPlayers,
+        passPopupPlayerIndex,
     ]);
 
   const sortedHand = useMemo(() => {
@@ -950,6 +1005,12 @@ useEffect(() => {
     return;
   }
 
+  // パス表示中は、まだ手番を移動している途中なので
+  // バースト判定を行わない
+  if (passPopupPlayerIndex !== null) {
+    return;
+  }
+
   if (currentPlayerIndex !== 0) {
     return;
   }
@@ -976,6 +1037,7 @@ useEffect(() => {
   openingDone,
   winnerIndex,
   flyingCards,
+  passPopupPlayerIndex,
   currentPlayerIndex,
   burstPlayers,
   hand,
@@ -1080,6 +1142,10 @@ useEffect(() => {
     };
 
   const passTurn = () => {
+    if (passPopupPlayerIndex !== null) {
+      return;
+    }
+
     if (flyingCards.length > 0) {
         return;
     }
@@ -1104,16 +1170,12 @@ useEffect(() => {
     setSelectedCard(null);
     playerTurnCountRef.current += 1;
 
-    setCurrentPlayerIndex(
-        getNextPlayerIndex(
-            currentPlayerIndex,
-            burstPlayers,
-        ),
-    );
+    showPassPopupThenAdvance(currentPlayerIndex);
   };
 
   forcePlayerActionRef.current = () => {
     if (
+      passPopupPlayerIndex !== null ||
       flyingCards.length > 0 ||
       burstPlayers.includes(0) ||
       !openingDone ||
@@ -1160,7 +1222,8 @@ useEffect(() => {
       winnerIndex === null &&
       currentPlayerIndex === 0 &&
       !burstPlayers.includes(0) &&
-      flyingCards.length === 0;
+      flyingCards.length === 0 &&
+      passPopupPlayerIndex === null;
 
     if (!isPlayerTurn) {
       return undefined;
@@ -1199,6 +1262,7 @@ useEffect(() => {
     currentPlayerIndex,
     burstPlayers,
     flyingCards.length,
+    passPopupPlayerIndex,
   ]);
 
     const restartGame = () => {
@@ -1292,6 +1356,12 @@ useEffect(() => {
                         }`}
                         key={opponent.id}
                     >
+                        {passPopupPlayerIndex === playerIndex && (
+                          <div className="passPopup" role="status">
+                            パス
+                          </div>
+                        )}
+
                         <img
                         className="opponentIcon"
                         src={opponent.image}
@@ -1433,6 +1503,7 @@ useEffect(() => {
                 className="playCardButton"
                 onClick={() => playCard()}
                 disabled={
+                passPopupPlayerIndex !== null ||
                 flyingCards.length > 0 ||
                 burstPlayers.includes(0) ||
                 !openingDone ||
@@ -1441,17 +1512,17 @@ useEffect(() => {
                 }
               >
                 <span className="playButtonLabel">カードを出す</span>
-                {openingDone && currentPlayerIndex === 0 && (
+                {openingDone &&
+                  currentPlayerIndex === 0 &&
+                  flyingCards.length === 0 &&
+                  passPopupPlayerIndex === null && (
                   <>
                     <strong className="turnCountdown">
                       {playerTurnCountRef.current === 0
                         ? "－"
                         : turnSeconds}
                     </strong>
-
-                    <span className="turnCountdownUnit">
-                      秒
-                    </span>
+                    <span className="turnCountdownUnit">秒</span>
                   </>
                 )}
               </button>
@@ -1461,6 +1532,7 @@ useEffect(() => {
                 className="passButton"
                 onClick={passTurn}
                 disabled={
+                passPopupPlayerIndex !== null ||
                 flyingCards.length > 0 ||
                 burstPlayers.includes(0) ||
                 !openingDone ||
