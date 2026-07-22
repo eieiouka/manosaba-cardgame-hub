@@ -346,7 +346,10 @@ function Sevens({
     useState([]);
 
   const [burstPlayers, setBurstPlayers] =
-    useState([]);
+  useState([]);
+
+  const [burstCardCounts, setBurstCardCounts] =
+    useState({});
 
   const [winnerIndex, setWinnerIndex] =
     useState(null);
@@ -361,9 +364,9 @@ function Sevens({
 
   const passVoiceSources = [
     null, // 自分の音声を追加するとき: "/audio/player-pass.mp3"
-    null, // 左の相手: "/audio/opponent-left-pass.mp3"
-    null, // 中央の相手: "/audio/opponent-center-pass.mp3"
-    null, // 右の相手: "/audio/opponent-right-pass.mp3"
+    "/audio/ema-pass.mp3",
+    "/audio/sherry-pass.mp3",
+    "/audio/hanna-pass.mp3",
   ];
 
   const playPassVoice = (playerIndex) => {
@@ -872,6 +875,13 @@ function Sevens({
         return;
     }
 
+    const burstCardCount = cards.length;
+
+    setBurstCardCounts((currentCounts) => ({
+      ...currentCounts,
+      [playerIndex]: burstCardCount,
+    }));
+
     const tableElement = tableRef.current;
     const burstId =
         `burst-${playerIndex}-${Date.now()}`;
@@ -1346,15 +1356,20 @@ useEffect(() => {
                     const playerIndex = opponentIndex + 1;
 
                     const isCurrentOpponent =
-                    openingDone &&
-                    currentPlayerIndex === playerIndex;
+                      openingDone &&
+                      currentPlayerIndex === playerIndex;
+
+                    const isBurstOpponent =
+                      burstPlayers.includes(playerIndex);
 
                     return (
                     <section
-                        className={`opponent ${opponent.position} ${
+                      className={`opponent ${opponent.position} ${
                         isCurrentOpponent ? "currentOpponent" : ""
-                        }`}
-                        key={opponent.id}
+                      } ${
+                        isBurstOpponent ? "burstOpponent" : ""
+                      }`}
+                      key={opponent.id}
                     >
                         {passPopupPlayerIndex === playerIndex && (
                           <div className="passPopup" role="status">
@@ -1370,7 +1385,11 @@ useEffect(() => {
 
                         <div className="opponentInfoRow">
                             <span className="opponentRemaining">
-                                残り{cpuHands[opponentIndex].length}枚
+                              残り
+                              {isBurstOpponent
+                                ? burstCardCounts[playerIndex]
+                                : cpuHands[opponentIndex].length}
+                              枚
                             </span>
 
                             <div
@@ -1449,9 +1468,24 @@ useEffect(() => {
 
           <section className="playerArea">
             <div
-              className="playerHand"
+              className={`playerHand ${
+                burstPlayers.includes(0) ? "burstPlayerHand" : ""
+              }`}
               data-count={sortedHand.length}
             >
+              {burstPlayers.includes(0) && (
+                <div className="playerBurstDisplay">
+                  <span className="playerBurstTitle">
+                    バースト
+                  </span>
+
+                  <span className="playerBurstCount">
+                    <strong>{burstCardCounts[0]}</strong>
+                    <small>枚</small>
+                  </span>
+                </div>
+              )}
+
               <div className="playerHandTrack">
                 {sortedHand.map((card, index) => {
                   const playable =
