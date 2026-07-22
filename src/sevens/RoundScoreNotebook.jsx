@@ -34,12 +34,12 @@ function RoundScoreNotebook({
   const completedRef = useRef(false);
 
   /*
-   * 表示する点数の順番
-   *
-   * 0：手札マイナス
-   * 1：トップ賞
-   * 2：飛びマイナス
-   */
+    * 表示する点数の順番
+    *
+    * 0：残り手札
+    * 1：順位点
+    * 2：生存ボーナス
+  */
   const scoreSteps = useMemo(
     () => [
       {
@@ -48,16 +48,14 @@ function RoundScoreNotebook({
       },
       {
         key: "topBonus",
-        label: roundResult.isFinishedTop
-          ? "上がりトップ賞"
-          : "トップ賞",
+        label: "順位点",
       },
       {
         key: "survivalBonus",
         label: "生存ボーナス",
       },
     ],
-    [roundResult.isFinishedTop],
+    [],
   );
 
   useEffect(() => {
@@ -151,8 +149,10 @@ function RoundScoreNotebook({
           </div>
 
           <div className="roundNotebookRule">
-            <span>上がりトップ +25</span>
-            <span>トップ +20</span>
+            <span>1位 +20</span>
+            <span>2位 +10</span>
+            <span>3位 +5</span>
+            <span>4位 +0</span>
             <span>生存 +10</span>
             <span>手札 -1／枚</span>
           </div>

@@ -1486,7 +1486,9 @@ useEffect(() => {
       cpuHands[2]?.length ?? 0,
     ];
 
-    const players = [0, 1, 2, 3].map(
+    const rankPoints = [20, 10, 5, 0];
+
+    const playerResults = [0, 1, 2, 3].map(
       (playerIndex) => {
         const isBurst =
           burstPlayers.includes(playerIndex);
@@ -1495,35 +1497,89 @@ useEffect(() => {
           ? burstCardCounts[playerIndex] ?? 0
           : currentHandCounts[playerIndex];
 
-        const handPenalty =
-          -remainingHandCount;
-
-        let topBonus = 0;
-
-        if (playerIndex === winnerIndex) {
-          topBonus =
-            winnerType === "finished"
-              ? 25
-              : 20;
-        }
-
-        const survivalBonus =
-          isBurst ? 0 : 10;
-
         return {
           playerIndex,
-          remainingHandCount,
-          handPenalty,
-          topBonus,
-          survivalBonus,
           isBurst,
-          total:
-            handPenalty +
-            topBonus +
-            survivalBonus,
+          remainingHandCount,
         };
       },
     );
+
+    const sortedPlayerResults = [...playerResults].sort(
+      (resultA, resultB) => {
+        // 生存者をバーストしたプレイヤーより上位にする
+        if (resultA.isBurst !== resultB.isBurst) {
+          return resultA.isBurst ? 1 : -1;
+        }
+
+        // 同じ状態なら、残り枚数が少ない方を上位にする
+        return (
+          resultA.remainingHandCount -
+          resultB.remainingHandCount
+        );
+      },
+    );
+
+    const rankByPlayerIndex = {};
+
+    sortedPlayerResults.forEach(
+      (result, sortedIndex) => {
+        if (sortedIndex === 0) {
+          rankByPlayerIndex[result.playerIndex] = 0;
+          return;
+        }
+
+        const previousResult =
+          sortedPlayerResults[sortedIndex - 1];
+
+        const isSameRank =
+          result.isBurst === previousResult.isBurst &&
+          result.remainingHandCount ===
+            previousResult.remainingHandCount;
+
+        if (isSameRank) {
+          rankByPlayerIndex[result.playerIndex] =
+            rankByPlayerIndex[
+              previousResult.playerIndex
+            ];
+        } else {
+          rankByPlayerIndex[result.playerIndex] =
+            sortedIndex;
+        }
+      },
+    );
+
+    const players = playerResults.map((result) => {
+      const {
+        playerIndex,
+        isBurst,
+        remainingHandCount,
+      } = result;
+
+      const handPenalty = -remainingHandCount;
+
+      const rank =
+        rankByPlayerIndex[playerIndex];
+
+      const rankBonus =
+        rankPoints[rank] ?? 0;
+
+      const survivalBonus =
+        isBurst ? 0 : 10;
+
+      return {
+        playerIndex,
+        remainingHandCount,
+        handPenalty,
+        topBonus: rankBonus,
+        survivalBonus,
+        isBurst,
+        total:
+          handPenalty +
+          rankBonus +
+          survivalBonus,
+      };
+    });
 
     setRoundResult({
       roundNumber: currentRound,
