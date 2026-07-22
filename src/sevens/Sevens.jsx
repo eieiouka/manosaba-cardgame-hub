@@ -359,14 +359,71 @@ function Sevens({
   const passDelayTimerRef = useRef(null);
   const playerTurnCountRef = useRef(0);
   const forcePlayerActionRef = useRef(null);
+  const activeAudioRef = useRef(null);
+  const burstAudioRef = useRef(null);
 
   const tableRef = useRef(null);
 
   const passVoiceSources = [
-    null, // 自分の音声を追加するとき: "/audio/player-pass.mp3"
+    "/audio/nanoka-pass.mp3",
     "/audio/ema-pass.mp3",
     "/audio/sherry-pass.mp3",
     "/audio/hanna-pass.mp3",
+  ];
+
+  const cardPlaySoundSource = "/audio/card-play.mp3";
+
+  const playAudio = ({
+    source,
+    volume = 1,
+    skipIfPlaying = false,
+  }) => {
+    if (!source) {
+      return null;
+    }
+
+    const currentAudio = activeAudioRef.current;
+
+    if (
+      skipIfPlaying &&
+      currentAudio &&
+      !currentAudio.paused &&
+      !currentAudio.ended
+    ) {
+      return null;
+    }
+
+    const audio = new Audio(source);
+    audio.volume = volume;
+
+    activeAudioRef.current = audio;
+
+    const clearActiveAudio = () => {
+      if (activeAudioRef.current === audio) {
+        activeAudioRef.current = null;
+      }
+    };
+
+    audio.addEventListener("ended", clearActiveAudio, {
+      once: true,
+    });
+
+    audio.addEventListener("error", clearActiveAudio, {
+      once: true,
+    });
+
+    audio.play().catch(() => {
+      clearActiveAudio();
+    });
+
+    return audio;
+  };
+
+  const burstVoiceSources = [
+    "/audio/nanoka-burst.mp3",
+    "/audio/ema-burst.mp3",
+    "/audio/sherry-burst.mp3",
+    "/audio/hanna-burst.mp3",
   ];
 
   const playPassVoice = (playerIndex) => {
@@ -377,26 +434,82 @@ function Sevens({
     }
 
     const audio = new Audio(source);
+    audio.volume = 0.8;
+
     audio.play().catch(() => {
-      // ブラウザ側で自動再生が拒否された場合は何もしない
+      // 再生できなかった場合は何もしない
+    });
+  };
+
+  const playCardPlaySound = () => {
+    // バースト音が流れている最中だけ、カード音を鳴らさない
+    if (
+      burstAudioRef.current &&
+      !burstAudioRef.current.paused &&
+      !burstAudioRef.current.ended
+    ) {
+      return;
+    }
+
+    const audio = new Audio(cardPlaySoundSource);
+    audio.volume = 0.65;
+
+    audio.play().catch(() => {
+      // 再生できなかった場合は何もしない
+    });
+  };
+
+  const playBurstVoice = (playerIndex) => {
+    const source = burstVoiceSources[playerIndex];
+
+    if (!source) {
+      return;
+    }
+
+    const audio = new Audio(source);
+    audio.volume = 1;
+
+    burstAudioRef.current = audio;
+
+    const clearBurstAudio = () => {
+      if (burstAudioRef.current === audio) {
+        burstAudioRef.current = null;
+      }
+    };
+
+    audio.addEventListener("ended", clearBurstAudio, {
+      once: true,
+    });
+
+    audio.addEventListener("error", clearBurstAudio, {
+      once: true,
+    });
+
+    audio.play().catch(() => {
+      clearBurstAudio();
     });
   };
 
   const showPassPopupThenAdvance = (playerIndex) => {
-    setPassPopupPlayerIndex(playerIndex);
-    playPassVoice(playerIndex);
-
     if (passDelayTimerRef.current !== null) {
       window.clearTimeout(passDelayTimerRef.current);
     }
 
+    setPassPopupPlayerIndex(playerIndex);
+    playPassVoice(playerIndex);
+
     passDelayTimerRef.current = window.setTimeout(() => {
       setPassPopupPlayerIndex(null);
+
       setCurrentPlayerIndex(
-        getNextPlayerIndex(playerIndex, burstPlayers),
+        getNextPlayerIndex(
+          playerIndex,
+          burstPlayers,
+        ),
       );
+
       passDelayTimerRef.current = null;
-    }, 800);
+    }, 1000);
   };
 
   useEffect(() => {
@@ -516,6 +629,8 @@ function Sevens({
 
             const flyingCardId =
               `opening-${card.ownerIndex}-${card.suit}-7-${index}`;
+
+            playCardPlaySound();
 
             setFlyingCards((currentFlyingCards) => [
               ...currentFlyingCards,
@@ -844,6 +959,8 @@ function Sevens({
     const flyingCardId =
         `normal-${ownerIndex}-${card.suit}-${card.rank}-${Date.now()}`;
 
+    playCardPlaySound();
+
     setFlyingCards((currentFlyingCards) => [
         ...currentFlyingCards,
         {
@@ -874,6 +991,8 @@ function Sevens({
     if (cards.length === 0) {
         return;
     }
+
+    playBurstVoice(playerIndex);
 
     const burstCardCount = cards.length;
 
