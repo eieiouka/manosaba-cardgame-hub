@@ -1192,3 +1192,600 @@ body,
   font-weight: 800;
   color: #fff4dd;
 }
+
+.playerBurstCount small {
+  font-size: 27px;
+  font-weight: 800;
+  color: #fff4dd;
+}
+
+/* =========================================
+   ここから下にメモ帳用CSSを追加
+   ========================================= */
+
+/* =========================================
+   7回戦スコアメモ帳
+   ========================================= */
+
+.roundNotebookOverlay {
+  position: absolute;
+  z-index: 1000;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 3.2cqw;
+
+  background: rgba(4, 13, 15, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.roundNotebook {
+  position: relative;
+
+  width: 88cqw;
+  min-height: 48cqw;
+  padding:
+    3.2cqw
+    3cqw
+    2.4cqw
+    4.6cqw;
+
+  overflow: hidden;
+
+  color: #30281f;
+
+  border: 0.2cqw solid #c7b78f;
+  border-radius:
+    0.8cqw
+    1.5cqw
+    1.5cqw
+    0.8cqw;
+
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 2.85cqw,
+      rgba(103, 137, 164, 0.2) 2.9cqw,
+      rgba(103, 137, 164, 0.2) 3cqw
+    ),
+    #f4eedc;
+
+  box-shadow:
+    0 1.6cqw 3.7cqw rgba(0, 0, 0, 0.46),
+    inset 0 0 2.3cqw rgba(112, 88, 46, 0.12);
+
+  animation:
+    roundNotebookEnter
+    550ms
+    cubic-bezier(0.18, 0.86, 0.28, 1.12)
+    both;
+}
+
+@keyframes roundNotebookEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      translateX(9cqw)
+      rotate(1.5deg);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateX(0)
+      rotate(0);
+  }
+}
+
+.roundNotebookBinding {
+  position: absolute;
+  top: 2.1cqw;
+  bottom: 2.1cqw;
+  left: 1.3cqw;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.roundNotebookBinding span {
+  width: 1.6cqw;
+  height: 0.6cqw;
+
+  border: 0.2cqw solid #70695d;
+  border-right: 0;
+  border-radius: 0.8cqw 0 0 0.8cqw;
+
+  background: #bcb4a4;
+
+  box-shadow:
+    -0.3cqw
+    0.13cqw
+    0.27cqw
+    rgba(0, 0, 0, 0.2);
+}
+
+.roundNotebookHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2cqw;
+
+  margin-bottom: 1.8cqw;
+
+  border-bottom:
+    0.2cqw
+    double
+    rgba(82, 65, 44, 0.48);
+}
+
+.roundNotebookSubTitle,
+.finalScoreSubTitle {
+  display: block;
+
+  color: #76654d;
+
+  font-family:
+    "Cormorant Garamond",
+    serif;
+
+  font-size: 1.25cqw;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.roundNotebookHeader h2,
+.finalScorePanel h2 {
+  margin: 0;
+
+  font-family:
+    "Noto Sans JP",
+    sans-serif;
+
+  font-size: 2.8cqw;
+  font-weight: 900;
+}
+
+.roundNotebookRule {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap:
+    0.5cqw
+    1.2cqw;
+
+  padding-bottom: 0.6cqw;
+
+  font-size: 1.05cqw;
+  font-weight: 700;
+}
+
+.roundNotebookTable {
+  display: grid;
+
+  grid-template-columns:
+    14cqw
+    repeat(7, minmax(5.4cqw, 1fr))
+    7.7cqw;
+
+  border-top:
+    0.13cqw
+    solid
+    rgba(79, 67, 50, 0.54);
+
+  border-left:
+    0.13cqw
+    solid
+    rgba(79, 67, 50, 0.54);
+}
+
+.roundNotebookCorner,
+.roundNotebookRoundHeader,
+.roundNotebookTotalHeader,
+.roundNotebookPlayerName,
+.roundNotebookScoreCell,
+.roundNotebookTotalCell {
+  min-height: 4.1cqw;
+
+  border-right:
+    0.13cqw
+    solid
+    rgba(79, 67, 50, 0.4);
+
+  border-bottom:
+    0.13cqw
+    solid
+    rgba(79, 67, 50, 0.4);
+}
+
+.roundNotebookCorner,
+.roundNotebookRoundHeader,
+.roundNotebookTotalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 3.2cqw;
+
+  font-size: 1.05cqw;
+  font-weight: 900;
+
+  background: rgba(132, 112, 77, 0.13);
+}
+
+.roundNotebookTotalHeader {
+  background: rgba(117, 89, 43, 0.25);
+}
+
+.currentRoundHeader {
+  color: #fff8df;
+  background: #80683e;
+}
+
+.roundNotebookPlayerRow {
+  display: contents;
+}
+
+.roundNotebookPlayerName {
+  display: flex;
+  align-items: center;
+  gap: 0.65cqw;
+
+  padding:
+    0
+    0.9cqw;
+
+  font-size: 1.2cqw;
+  font-weight: 900;
+}
+
+.roundNotebookPlayerNumber {
+  display: grid;
+  place-items: center;
+
+  width: 1.9cqw;
+  height: 1.9cqw;
+  flex: 0 0 1.9cqw;
+
+  color: #f9f2de;
+  background: #65543c;
+
+  border-radius: 50%;
+}
+
+.roundWinnerMark,
+.roundBurstMark {
+  padding:
+    0.2cqw
+    0.45cqw;
+
+  border-radius: 0.3cqw;
+
+  font-size: 0.75cqw;
+  line-height: 1;
+}
+
+.roundWinnerMark {
+  color: #fff5c9;
+  background: #917332;
+}
+
+.roundBurstMark {
+  color: #fff;
+  background: #8e3933;
+}
+
+.roundNotebookScoreCell,
+.roundNotebookTotalCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family:
+    "Cormorant Garamond",
+    serif;
+
+  font-size: 1.9cqw;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.currentRoundScoreCell {
+  background: rgba(214, 182, 95, 0.16);
+
+  animation:
+    currentScorePulse
+    1.2s
+    ease-in-out
+    infinite
+    alternate;
+}
+
+@keyframes currentScorePulse {
+  from {
+    background-color:
+      rgba(214, 182, 95, 0.09);
+  }
+
+  to {
+    background-color:
+      rgba(214, 182, 95, 0.24);
+  }
+}
+
+.roundNotebookTotalCell {
+  font-size: 2.25cqw;
+
+  background:
+    rgba(117, 89, 43, 0.16);
+
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.positiveScore {
+  color: #286243;
+}
+
+.negativeScore {
+  color: #a33a32;
+}
+
+.roundScoreBreakdown {
+  margin-top: 1.65cqw;
+}
+
+.roundScoreBreakdown h3 {
+  margin:
+    0
+    0
+    0.8cqw;
+
+  font-size: 1.35cqw;
+}
+
+.roundScoreBreakdownGrid {
+  display: grid;
+  gap: 0.45cqw;
+}
+
+.roundScoreStep {
+  display: grid;
+
+  grid-template-columns:
+    14cqw
+    1fr;
+
+  align-items: center;
+
+  min-height: 2.85cqw;
+
+  padding:
+    0
+    1cqw;
+
+  opacity: 0;
+
+  border-bottom:
+    0.07cqw
+    dashed
+    rgba(72, 59, 40, 0.36);
+
+  transform: translateX(1.7cqw);
+
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.visibleRoundScoreStep {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.roundScoreStep > span {
+  font-size: 1.1cqw;
+  font-weight: 800;
+}
+
+.roundScoreStepValues {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  text-align: center;
+  font-size: 1.4cqw;
+}
+
+.roundNotebookFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 1.6cqw;
+}
+
+.roundNotebookProgress {
+  display: flex;
+  gap: 0.65cqw;
+}
+
+.roundNotebookProgress span {
+  width: 1.1cqw;
+  height: 1.1cqw;
+
+  border:
+    0.13cqw
+    solid
+    #796d58;
+
+  border-radius: 50%;
+}
+
+.roundNotebookProgress
+.completedRoundDot {
+  background: #80683e;
+}
+
+.roundNotebookNextButton {
+  min-width: 14cqw;
+  min-height: 3.85cqw;
+
+  padding:
+    0
+    2cqw;
+
+  color: #fff8e7;
+
+  border:
+    0.13cqw
+    solid
+    #c8ad73;
+
+  border-radius: 0.65cqw;
+
+  background:
+    linear-gradient(
+      180deg,
+      #947944,
+      #68522d
+    );
+
+  font-size: 1.3cqw;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  box-shadow:
+    0
+    0.47cqw
+    0
+    #46351f;
+}
+
+.roundNotebookNextButton:hover:not(:disabled) {
+  transform: translateY(-0.13cqw);
+
+  box-shadow:
+    0
+    0.6cqw
+    0
+    #46351f;
+}
+
+.roundNotebookNextButton:active:not(:disabled) {
+  transform: translateY(0.27cqw);
+
+  box-shadow:
+    0
+    0.2cqw
+    0
+    #46351f;
+}
+
+.roundNotebookNextButton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* =========================================
+   7回戦終了後の最終順位
+   ========================================= */
+
+.finalScoreOverlay {
+  position: absolute;
+  z-index: 1100;
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+
+  background: rgba(4, 12, 14, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+.finalScorePanel {
+  width: 41cqw;
+
+  padding: 3cqw;
+
+  color: #30281f;
+  background: #f4eedc;
+
+  border:
+    0.2cqw
+    solid
+    #c7b78f;
+
+  border-radius: 1.2cqw;
+
+  box-shadow:
+    0
+    1.6cqw
+    4cqw
+    rgba(0, 0, 0, 0.5);
+}
+
+.finalScorePlayer {
+  display: grid;
+
+  grid-template-columns:
+    4.7cqw
+    1fr
+    6.7cqw;
+
+  align-items: center;
+
+  min-height: 4.4cqw;
+
+  padding:
+    0
+    1.2cqw;
+
+  border-bottom:
+    0.07cqw
+    solid
+    rgba(74, 62, 45, 0.3);
+
+  font-size: 1.4cqw;
+}
+
+.finalScorePlayer b {
+  text-align: right;
+  font-size: 1.9cqw;
+}
+
+.finalScorePanel > button {
+  display: block;
+
+  min-width: 15.3cqw;
+  min-height: 3.7cqw;
+
+  margin:
+    2cqw
+    auto
+    0;
+
+  color: #fff8e7;
+  background: #68522d;
+
+  border:
+    0.13cqw
+    solid
+    #c8ad73;
+
+  border-radius: 0.65cqw;
+
+  font-size: 1.25cqw;
+  font-weight: 900;
+
+  cursor: pointer;
+}

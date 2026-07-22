@@ -6,12 +6,20 @@ import {
 } from "react";
 
 import { chooseCpuAction } from "./sevensCpu";
-import ResultScreen from "./ResultScreen";
+import RoundScoreNotebook from "./RoundScoreNotebook";
 import "./Sevens.css";
 
 const GAME_WIDTH = 1500;
 const GAME_HEIGHT = 1220;
 const PAGE_PADDING = 16;
+
+const TOTAL_ROUNDS = 7;
+
+const ROUND_SCORE_STORAGE_KEY =
+  "manosaba-sevens-round-scores";
+
+const ROUND_NUMBER_STORAGE_KEY =
+  "manosaba-sevens-round-number";
 
 function calculateGameScale() {
   const viewportWidth =
@@ -128,6 +136,48 @@ const opponents = [
     position: "opponentRight",
   },
 ];
+
+function loadSavedRoundScores() {
+  try {
+    const savedValue = window.sessionStorage.getItem(
+      ROUND_SCORE_STORAGE_KEY,
+    );
+
+    if (!savedValue) {
+      return [];
+    }
+
+    const parsedValue = JSON.parse(savedValue);
+
+    return Array.isArray(parsedValue)
+      ? parsedValue
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadCurrentRoundNumber() {
+  try {
+    const savedValue = window.sessionStorage.getItem(
+      ROUND_NUMBER_STORAGE_KEY,
+    );
+
+    const parsedValue = Number(savedValue);
+
+    if (
+      Number.isInteger(parsedValue) &&
+      parsedValue >= 1 &&
+      parsedValue <= TOTAL_ROUNDS
+    ) {
+      return parsedValue;
+    }
+
+    return 1;
+  } catch {
+    return 1;
+  }
+}
 
 function getRankFileName(rank) {
   if (rank === 1) return "A";
@@ -353,6 +403,23 @@ function Sevens({
 
   const [winnerIndex, setWinnerIndex] =
     useState(null);
+
+  const [winnerType, setWinnerType] =
+  useState(null);
+
+  const [currentRound, setCurrentRound] =
+    useState(loadCurrentRoundNumber);
+
+  const [savedRoundScores, setSavedRoundScores] =
+    useState(loadSavedRoundScores);
+
+  const [roundResult, setRoundResult] =
+    useState(null);
+
+  const [finalResultVisible, setFinalResultVisible] =
+    useState(false);
+
+  const roundRecordedRef = useRef(false);
 
   const [turnSeconds, setTurnSeconds] = useState(3);
   const [passPopupPlayerIndex, setPassPopupPlayerIndex] = useState(null);
@@ -855,8 +922,9 @@ function Sevens({
                     }));
 
                     if (nextCpuHand.length === 0) {
-                        setWinnerIndex(currentPlayerIndex);
-                        return;
+                      setWinnerType("finished");
+                      setWinnerIndex(currentPlayerIndex);
+                      return;
                     }
 
                     setCurrentPlayerIndex(
@@ -1108,8 +1176,9 @@ function Sevens({
         );
 
         if (remainingPlayers.length === 1) {
-        setWinnerIndex(remainingPlayers[0]);
-        return;
+          setWinnerType("survived");
+          setWinnerIndex(remainingPlayers[0]);
+          return;
         }
 
         setCurrentPlayerIndex(
@@ -1256,8 +1325,9 @@ useEffect(() => {
         }));
 
         if (nextHand.length === 0) {
-            setWinnerIndex(0);
-            return;
+          setWinnerType("finished");
+          setWinnerIndex(0);
+          return;
         }
 
         setCurrentPlayerIndex(
@@ -1394,8 +1464,158 @@ useEffect(() => {
     passPopupPlayerIndex,
   ]);
 
+  useEffect(() => {
+    if (winnerIndex === null) {
+      return;
+    }
+
+    if (!winnerType) {
+      return;
+    }
+
+    if (roundRecordedRef.current) {
+      return;
+    }
+
+    roundRecordedRef.current = true;
+
+    const currentHandCounts = [
+      hand.length,
+      cpuHands[0]?.length ?? 0,
+      cpuHands[1]?.length ?? 0,
+      cpuHands[2]?.length ?? 0,
+    ];
+
+    const players = [0, 1, 2, 3].map(
+      (playerIndex) => {
+        const isBurst =
+          burstPlayers.includes(playerIndex);
+
+        const remainingHandCount = isBurst
+          ? burstCardCounts[playerIndex] ?? 0
+          : currentHandCounts[playerIndex];
+
+        const handPenalty =
+          -remainingHandCount;
+
+        let topBonus = 0;
+
+        if (playerIndex === winnerIndex) {
+          topBonus =
+            winnerType === "finished"
+              ? 25
+              : 20;
+        }
+
+        const survivalBonus =
+          isBurst ? 0 : 10;
+
+        return {
+          playerIndex,
+          remainingHandCount,
+          handPenalty,
+          topBonus,
+          survivalBonus,
+          isBurst,
+          total:
+            handPenalty +
+            topBonus +
+            survivalBonus,
+        };
+      },
+    );
+
+    setRoundResult({
+      roundNumber: currentRound,
+      winnerIndex,
+      winnerType,
+      isFinishedTop:
+        winnerType === "finished",
+      players,
+    });
+  }, [
+    winnerIndex,
+    winnerType,
+    currentRound,
+    hand,
+    cpuHands,
+    burstPlayers,
+    burstCardCounts,
+  ]);
+
+    const saveCurrentRoundResult = () => {
+      if (!roundResult) {
+        return savedRoundScores;
+      }
+
+      const alreadySaved = savedRoundScores.some(
+        (savedRound) =>
+          savedRound.roundNumber ===
+          roundResult.roundNumber,
+      );
+
+      if (alreadySaved) {
+        return savedRoundScores;
+      }
+
+      const nextSavedRoundScores = [
+        ...savedRoundScores,
+        roundResult,
+      ];
+
+      setSavedRoundScores(nextSavedRoundScores);
+
+      window.sessionStorage.setItem(
+        ROUND_SCORE_STORAGE_KEY,
+        JSON.stringify(nextSavedRoundScores),
+      );
+
+      return nextSavedRoundScores;
+    };
+
+    const goToNextRound = () => {
+      if (!roundResult) {
+        return;
+      }
+
+      saveCurrentRoundResult();
+
+      const nextRound = Math.min(
+        TOTAL_ROUNDS,
+        currentRound + 1,
+      );
+
+      window.sessionStorage.setItem(
+        ROUND_NUMBER_STORAGE_KEY,
+        String(nextRound),
+      );
+
+      onRestart();
+    };
+
+    const showFinalResult = () => {
+      saveCurrentRoundResult();
+      setFinalResultVisible(true);
+    };
+
     const restartGame = () => {
-        onRestart();
+      window.sessionStorage.removeItem(
+        ROUND_SCORE_STORAGE_KEY,
+      );
+
+      window.sessionStorage.removeItem(
+        ROUND_NUMBER_STORAGE_KEY,
+      );
+
+      setSavedRoundScores([]);
+      setCurrentRound(1);
+      setRoundResult(null);
+      setFinalResultVisible(false);
+      setWinnerType(null);
+
+      roundRecordedRef.current = false;
+
+      onRestart();
     };
 
   return (
@@ -1704,12 +1924,17 @@ useEffect(() => {
           </section>
         </section>
 
-        {winnerIndex !== null && (
-          <ResultScreen
-            winnerIndex={winnerIndex}
-            onRestart={restartGame}
-          />
-        )}
+        {winnerIndex !== null &&
+          roundResult !== null &&
+          !finalResultVisible && (
+            <RoundScoreNotebook
+              roundNumber={currentRound}
+              savedRoundScores={savedRoundScores}
+              roundResult={roundResult}
+              onNextRound={goToNextRound}
+              onFinishMatch={showFinalResult}
+            />
+          )}
         </div>
       </div>
     </main>
