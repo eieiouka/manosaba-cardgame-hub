@@ -1612,6 +1612,7 @@ useEffect(() => {
       setRoundResult(null);
       setFinalResultVisible(false);
       setWinnerType(null);
+      setWinnerIndex(null);
 
       roundRecordedRef.current = false;
 
