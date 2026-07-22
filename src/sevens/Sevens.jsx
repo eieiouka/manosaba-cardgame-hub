@@ -15,11 +15,44 @@ const PAGE_PADDING = 16;
 
 const TOTAL_ROUNDS = 7;
 
+const playerNames = [
+  "ナノカ",
+  "桜羽エマ",
+  "橘シェリー",
+  "遠野ハンナ",
+];
+
+function formatScore(score) {
+  if (score > 0) {
+    return `+${score}`;
+  }
+
+  return String(score);
+}
+
 const ROUND_SCORE_STORAGE_KEY =
   "manosaba-sevens-round-scores";
 
 const ROUND_NUMBER_STORAGE_KEY =
   "manosaba-sevens-round-number";
+
+const navigationEntry =
+  window.performance
+    .getEntriesByType("navigation")
+    .find(
+      (entry) =>
+        entry.entryType === "navigation",
+    );
+
+if (navigationEntry?.type === "reload") {
+  window.sessionStorage.removeItem(
+    ROUND_SCORE_STORAGE_KEY,
+  );
+
+  window.sessionStorage.removeItem(
+    ROUND_NUMBER_STORAGE_KEY,
+  );
+}
 
 function calculateGameScale() {
   const viewportWidth =
@@ -350,6 +383,278 @@ function getElementCenterRelativeTo(element, ancestor) {
     left: left + element.offsetWidth / 2,
     top: top + element.offsetHeight / 2,
   };
+}
+
+function FinalMatchResult({
+  savedRoundScores,
+  roundResult,
+  onRestart,
+  onBackToHub,
+}) {
+  /*
+    7回戦目がまだsavedRoundScoresへ反映されていない瞬間でも、
+    roundResultを加えて必ず全7回戦を集計する。
+  */
+  const allRoundScores = [...savedRoundScores];
+
+  const currentRoundAlreadySaved = allRoundScores.some(
+    (savedRound) =>
+      savedRound.roundNumber === roundResult?.roundNumber,
+  );
+
+  if (roundResult && !currentRoundAlreadySaved) {
+    allRoundScores.push(roundResult);
+  }
+
+  allRoundScores.sort(
+    (roundA, roundB) =>
+      roundA.roundNumber - roundB.roundNumber,
+  );
+
+  const totalScores = [0, 1, 2, 3].map(
+    (playerIndex) =>
+      allRoundScores.reduce(
+        (total, savedRound) =>
+          total +
+          (savedRound.players[playerIndex]?.total ?? 0),
+        0,
+      ),
+  );
+
+  const sortedPlayers = playerNames
+    .map((playerName, playerIndex) => ({
+      playerIndex,
+      playerName,
+      totalScore: totalScores[playerIndex],
+    }))
+    .sort((playerA, playerB) => {
+      if (playerB.totalScore !== playerA.totalScore) {
+        return playerB.totalScore - playerA.totalScore;
+      }
+
+      return playerA.playerIndex - playerB.playerIndex;
+    });
+
+  const rankByPlayerIndex = {};
+
+  sortedPlayers.forEach((player, sortedIndex) => {
+    if (sortedIndex === 0) {
+      rankByPlayerIndex[player.playerIndex] = 1;
+      return;
+    }
+
+    const previousPlayer =
+      sortedPlayers[sortedIndex - 1];
+
+    if (
+      player.totalScore ===
+      previousPlayer.totalScore
+    ) {
+      rankByPlayerIndex[player.playerIndex] =
+        rankByPlayerIndex[
+          previousPlayer.playerIndex
+        ];
+
+      return;
+    }
+
+    rankByPlayerIndex[player.playerIndex] =
+      sortedIndex + 1;
+  });
+
+  const championScore =
+    sortedPlayers[0]?.totalScore ?? 0;
+
+  const championPlayers = sortedPlayers.filter(
+    (player) =>
+      player.totalScore === championScore,
+  );
+
+  return (
+    <div className="finalResultOverlay">
+      <section
+        className="finalResultPanel"
+        aria-label="最終結果"
+      >
+        <header className="finalResultHeader">
+          <span className="finalResultSubTitle">
+            SEVENS FINAL RESULT
+          </span>
+
+          <h2>最終結果</h2>
+
+          <p>全7回戦終了</p>
+        </header>
+
+        <section className="finalChampionArea">
+          <span className="finalChampionLabel">
+            CHAMPION
+          </span>
+
+          <strong className="finalChampionName">
+            {championPlayers
+              .map((player) => player.playerName)
+              .join("・")}
+          </strong>
+
+          <span className="finalChampionScore">
+            {formatScore(championScore)}
+            点
+          </span>
+        </section>
+
+        <section className="finalRanking">
+          {sortedPlayers.map((player) => {
+            const rank =
+              rankByPlayerIndex[player.playerIndex];
+
+            return (
+              <div
+                key={player.playerIndex}
+                className={`finalRankingRow finalRank${rank}`}
+              >
+                <div className="finalRankingPosition">
+                  <span>{rank}</span>
+                  <small>位</small>
+                </div>
+
+                <div className="finalRankingPlayer">
+                  <span className="finalRankingPlayerNumber">
+                    {player.playerIndex + 1}
+                  </span>
+
+                  <strong>
+                    {player.playerName}
+                  </strong>
+                </div>
+
+                <div
+                  className={`finalRankingScore ${
+                    player.totalScore > 0
+                      ? "positiveScore"
+                      : player.totalScore < 0
+                        ? "negativeScore"
+                        : ""
+                  }`}
+                >
+                  {formatScore(player.totalScore)}
+                  <small>点</small>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        <section className="finalRoundHistory">
+          <h3>対局記録</h3>
+
+          <div className="finalRoundHistoryTable">
+            <div className="finalHistoryCorner">
+              プレイヤー
+            </div>
+
+            {Array.from(
+              { length: TOTAL_ROUNDS },
+              (_, index) => (
+                <div
+                  key={index}
+                  className="finalHistoryRoundHeader"
+                >
+                  {index + 1}
+                </div>
+              ),
+            )}
+
+            <div className="finalHistoryTotalHeader">
+              合計
+            </div>
+
+            {playerNames.map(
+              (playerName, playerIndex) => (
+                <div
+                  key={playerName}
+                  className="finalHistoryPlayerRow"
+                >
+                  <div className="finalHistoryPlayerName">
+                    {playerName}
+                  </div>
+
+                  {Array.from(
+                    { length: TOTAL_ROUNDS },
+                    (_, index) => {
+                      const roundNumber =
+                        index + 1;
+
+                      const savedRound =
+                        allRoundScores.find(
+                          (round) =>
+                            round.roundNumber ===
+                            roundNumber,
+                        );
+
+                      const score =
+                        savedRound?.players[
+                          playerIndex
+                        ]?.total;
+
+                      return (
+                        <div
+                          key={roundNumber}
+                          className={`finalHistoryScore ${
+                            score > 0
+                              ? "positiveScore"
+                              : score < 0
+                                ? "negativeScore"
+                                : ""
+                          }`}
+                        >
+                          {typeof score === "number"
+                            ? formatScore(score)
+                            : ""}
+                        </div>
+                      );
+                    },
+                  )}
+
+                  <div
+                    className={`finalHistoryTotal ${
+                      totalScores[playerIndex] > 0
+                        ? "positiveScore"
+                        : totalScores[playerIndex] < 0
+                          ? "negativeScore"
+                          : ""
+                    }`}
+                  >
+                    {formatScore(
+                      totalScores[playerIndex],
+                    )}
+                  </div>
+                </div>
+              ),
+            )}
+          </div>
+        </section>
+
+        <footer className="finalResultFooter">
+          <button
+            type="button"
+            className="finalResultHubButton"
+            onClick={onBackToHub}
+          >
+            HUBへ戻る
+          </button>
+
+          <button
+            type="button"
+            className="finalResultRestartButton"
+            onClick={onRestart}
+          >
+            もう一度遊ぶ
+          </button>
+        </footer>
+      </section>
+    </div>
+  );
 }
 
 function Sevens({
@@ -1505,49 +1810,99 @@ useEffect(() => {
       },
     );
 
-    const sortedPlayerResults = [...playerResults].sort(
-      (resultA, resultB) => {
-        // 生存者をバーストしたプレイヤーより上位にする
-        if (resultA.isBurst !== resultB.isBurst) {
-          return resultA.isBurst ? 1 : -1;
-        }
+        const sortedPlayerResults = [...playerResults].sort(
+          (resultA, resultB) => {
+            /*
+            * 実際にゲームを終了させたプレイヤーを、
+            * 残り手札枚数に関係なく必ず1位にする。
+            */
+            if (resultA.playerIndex === winnerIndex) {
+              return -1;
+            }
 
-        // 同じ状態なら、残り枚数が少ない方を上位にする
-        return (
-          resultA.remainingHandCount -
-          resultB.remainingHandCount
+            if (resultB.playerIndex === winnerIndex) {
+              return 1;
+            }
+
+            /*
+            * トップ以外では、
+            * 飛んでいないプレイヤーを飛んだプレイヤーより
+            * 上位にする。
+            */
+            if (resultA.isBurst !== resultB.isBurst) {
+              return resultA.isBurst ? 1 : -1;
+            }
+
+            /*
+            * どちらも飛んでいない場合は、
+            * ゲーム終了時の残り手札が少ない方を上位にする。
+            */
+            if (!resultA.isBurst && !resultB.isBurst) {
+              return (
+                resultA.remainingHandCount -
+                resultB.remainingHandCount
+              );
+            }
+
+            /*
+            * どちらも飛んでいる場合は、
+            * 後に飛んだプレイヤーを上位にする。
+            *
+            * burstPlayersは、
+            * [最初に飛んだ人, 次に飛んだ人, ...]
+            * の順番で保存されている。
+            */
+            const burstOrderA = burstPlayers.indexOf(
+              resultA.playerIndex,
+            );
+
+            const burstOrderB = burstPlayers.indexOf(
+              resultB.playerIndex,
+            );
+
+            return burstOrderB - burstOrderA;
+          },
         );
-      },
-    );
 
-    const rankByPlayerIndex = {};
+        const rankByPlayerIndex = {};
 
-    sortedPlayerResults.forEach(
-      (result, sortedIndex) => {
-        if (sortedIndex === 0) {
-          rankByPlayerIndex[result.playerIndex] = 0;
-          return;
-        }
+        sortedPlayerResults.forEach(
+          (result, sortedIndex) => {
+            if (sortedIndex === 0) {
+              rankByPlayerIndex[result.playerIndex] = 0;
+              return;
+            }
 
-        const previousResult =
-          sortedPlayerResults[sortedIndex - 1];
+            const previousResult =
+              sortedPlayerResults[sortedIndex - 1];
 
-        const isSameRank =
-          result.isBurst === previousResult.isBurst &&
-          result.remainingHandCount ===
-            previousResult.remainingHandCount;
+            /*
+            * 同着になるのは、
+            * トップ以外の生存者同士で、
+            * 残り手札枚数も同じ場合だけ。
+            *
+            * 飛んだプレイヤーは飛んだ順番が異なるため、
+            * 同着にはしない。
+            */
+            const isSameRank =
+              result.playerIndex !== winnerIndex &&
+              previousResult.playerIndex !== winnerIndex &&
+              !result.isBurst &&
+              !previousResult.isBurst &&
+              result.remainingHandCount ===
+                previousResult.remainingHandCount;
 
-        if (isSameRank) {
-          rankByPlayerIndex[result.playerIndex] =
-            rankByPlayerIndex[
-              previousResult.playerIndex
-            ];
-        } else {
-          rankByPlayerIndex[result.playerIndex] =
-            sortedIndex;
-        }
-      },
-    );
+            if (isSameRank) {
+              rankByPlayerIndex[result.playerIndex] =
+                rankByPlayerIndex[
+                  previousResult.playerIndex
+                ];
+            } else {
+              rankByPlayerIndex[result.playerIndex] =
+                sortedIndex;
+            }
+          },
+        );
 
     const players = playerResults.map((result) => {
       const {
@@ -1990,6 +2345,15 @@ useEffect(() => {
               roundResult={roundResult}
               onNextRound={goToNextRound}
               onFinishMatch={showFinalResult}
+            />
+          )}
+
+          {finalResultVisible && roundResult !== null && (
+            <FinalMatchResult
+              savedRoundScores={savedRoundScores}
+              roundResult={roundResult}
+              onRestart={restartGame}
+              onBackToHub={() => navigate("/")}
             />
           )}
         </div>
