@@ -16,7 +16,7 @@ const PAGE_PADDING = 16;
 const TOTAL_ROUNDS = 7;
 
 const playerNames = [
-  "ナノカ",
+  "黒部ナノカ（You）",
   "桜羽エマ",
   "橘シェリー",
   "遠野ハンナ",
@@ -798,6 +798,20 @@ function Sevens({
     "/audio/hanna-burst.mp3",
   ];
 
+  const finishVoiceSources = [
+    "/audio/nanoka-finish.mp3",
+    "/audio/ema-finish.mp3",
+    "/audio/sherry-finish.mp3",
+    "/audio/hanna-finish.mp3",
+  ];
+
+  const championVoiceSources = [
+    "/audio/nanoka-champion.mp3",
+    "/audio/ema-champion.mp3",
+    "/audio/sherry-champion.mp3",
+    "/audio/hanna-champion.mp3",
+  ];
+
   const playPassVoice = (playerIndex) => {
     const source = passVoiceSources[playerIndex];
 
@@ -859,6 +873,84 @@ function Sevens({
 
     audio.play().catch(() => {
       clearBurstAudio();
+    });
+  };
+
+  const playFinishVoice = (playerIndex) => {
+    const source = finishVoiceSources[playerIndex];
+
+    if (!source) {
+      return;
+    }
+
+    const audio = new Audio(source);
+    audio.volume = 1;
+
+    activeAudioRef.current = audio;
+
+    const clearActiveAudio = () => {
+      if (activeAudioRef.current === audio) {
+        activeAudioRef.current = null;
+      }
+    };
+
+    audio.addEventListener(
+      "ended",
+      clearActiveAudio,
+      {
+        once: true,
+      },
+    );
+
+    audio.addEventListener(
+      "error",
+      clearActiveAudio,
+      {
+        once: true,
+      },
+    );
+
+    audio.play().catch(() => {
+      clearActiveAudio();
+    });
+  };
+
+  const playChampionVoice = (playerIndex) => {
+    const source = championVoiceSources[playerIndex];
+
+    if (!source) {
+      return;
+    }
+
+    const audio = new Audio(source);
+    audio.volume = 1;
+
+    activeAudioRef.current = audio;
+
+    const clearActiveAudio = () => {
+      if (activeAudioRef.current === audio) {
+        activeAudioRef.current = null;
+      }
+    };
+
+    audio.addEventListener(
+      "ended",
+      clearActiveAudio,
+      {
+        once: true,
+      },
+    );
+
+    audio.addEventListener(
+      "error",
+      clearActiveAudio,
+      {
+        once: true,
+      },
+    );
+
+    audio.play().catch(() => {
+      clearActiveAudio();
     });
   };
 
@@ -1227,6 +1319,7 @@ function Sevens({
                     }));
 
                     if (nextCpuHand.length === 0) {
+                      playFinishVoice(currentPlayerIndex);
                       setWinnerType("finished");
                       setWinnerIndex(currentPlayerIndex);
                       return;
@@ -1630,6 +1723,7 @@ useEffect(() => {
         }));
 
         if (nextHand.length === 0) {
+          playFinishVoice(0);
           setWinnerType("finished");
           setWinnerIndex(0);
           return;
@@ -2005,8 +2099,33 @@ useEffect(() => {
     };
 
     const showFinalResult = () => {
-      saveCurrentRoundResult();
+      const allRoundScores =
+        saveCurrentRoundResult();
+
+      const totalScores = [0, 1, 2, 3].map(
+        (playerIndex) =>
+          allRoundScores.reduce(
+            (total, savedRound) =>
+              total +
+              (
+                savedRound.players[playerIndex]
+                  ?.total ?? 0
+              ),
+            0,
+          ),
+      );
+
+      const highestScore = Math.max(
+        ...totalScores,
+      );
+
+      const championPlayerIndex =
+        totalScores.findIndex(
+          (score) => score === highestScore,
+        );
+
       setFinalResultVisible(true);
+      playChampionVoice(championPlayerIndex);
     };
 
     const restartGame = () => {
