@@ -51,7 +51,7 @@ export default function useOpeningAnimation({
       Sevens画面を表示してから、
       初回描画が落ち着くまで少し待つ。
     */
-    const openingStartDelay = 800;
+    const openingStartDelay = 1500;
 
     const launchInterval = 600;
     const flightDuration = 600;
