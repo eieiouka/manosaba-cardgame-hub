@@ -10,6 +10,7 @@ import PlayingCard from "./components/PlayingCard";
 import SevensBoard from "./components/SevensBoard";
 import OpponentArea from "./components/OpponentArea";
 import PlayerHand from "./components/PlayerHand";
+import TurnControls from "./components/TurnControls";
 import FinalMatchResult from "./components/FinalMatchResult";
 import RoundScoreNotebook from "./components/RoundScoreNotebook";
 import "./Sevens.css";
@@ -1908,63 +1909,22 @@ useEffect(() => {
               onPlayCard={playCard}
             />
 
-            <div
-                className={`actionButtons ${
-                    openingDone && currentPlayerIndex === 0
-                    ? "playerTurn"
-                    : ""
-                }`}
-            >
-              <button
-                type="button"
-                className="playCardButton"
-                onClick={() => playCard()}
-                disabled={
-                passPopupPlayerIndex !== null ||
-                flyingCards.length > 0 ||
-                burstPlayers.includes(0) ||
-                !openingDone ||
-                currentPlayerIndex !== 0 ||
-                !selectedCard
-                }
-              >
-                <span className="playButtonLabel">カードを出す</span>
-                {openingDone &&
-                  currentPlayerIndex === 0 &&
-                  flyingCards.length === 0 &&
-                  passPopupPlayerIndex === null && (
-                  <>
-                    <strong className="turnCountdown">
-                      {playerTurnCountRef.current === 0
-                        ? "－"
-                        : turnSeconds}
-                    </strong>
-                    <span className="turnCountdownUnit">秒</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                className="passButton"
-                onClick={passTurn}
-                disabled={
-                passPopupPlayerIndex !== null ||
-                flyingCards.length > 0 ||
-                burstPlayers.includes(0) ||
-                !openingDone ||
-                currentPlayerIndex !== 0 ||
-                passes <= 0
-                }
-              >
-                <span className="passButtonLabel">パス</span>
-                <span className="passRemainingLabel">残り</span>
-                <span className="passCount">
-                  <strong>{passes}</strong>
-                  <small>回</small>
-                </span>
-              </button>
-            </div>
+          <TurnControls
+            openingDone={openingDone}
+            currentPlayerIndex={currentPlayerIndex}
+            flyingCards={flyingCards}
+            passPopupPlayerIndex={passPopupPlayerIndex}
+            burstPlayers={burstPlayers}
+            selectedCard={selectedCard}
+            passes={passes}
+            turnSeconds={turnSeconds}
+            isFirstPlayerTurn={
+              playerTurnCountRef.current === 0
+            }
+            onPlayCard={() => playCard()}
+            onPassTurn={passTurn}
+          />
+            
           </section>
         </section>
 
