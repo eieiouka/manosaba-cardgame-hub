@@ -141,12 +141,16 @@ export default function useOpeningAnimation({
         const flyingCardId =
           `opening-${card.ownerIndex}-${card.suit}-7-${index}`;
 
-        setFlyingCards((currentFlyingCards) =>
-          currentFlyingCards.filter(
-            (flyingCard) =>
-              flyingCard.id !== flyingCardId,
-          ),
-        );
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            setFlyingCards((currentFlyingCards) =>
+              currentFlyingCards.filter(
+                (flyingCard) =>
+                  flyingCard.id !== flyingCardId,
+              ),
+            );
+          });
+        });
       }, index * launchInterval + flightDuration);
 
       timers.push(launchTimer, landingTimer);
@@ -157,9 +161,13 @@ export default function useOpeningAnimation({
         return;
       }
 
-      setFlyingCards([]);
-      setCurrentPlayerIndex(firstPlayerIndex);
-      setOpeningDone(true);
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          setFlyingCards([]);
+          setCurrentPlayerIndex(firstPlayerIndex);
+          setOpeningDone(true);
+        });
+      });
     }, orderedSevens.length * launchInterval + 100);
 
     timers.push(finishTimer);
