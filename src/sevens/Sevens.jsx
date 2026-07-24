@@ -7,7 +7,7 @@ import {
 
 import { chooseCpuAction } from "./sevensCpu";
 import PlayingCard from "./components/PlayingCard";
-import EmptyCardSlot from "./components/EmptyCardSlot";
+import SevensBoard from "./components/SevensBoard";
 import FinalMatchResult from "./components/FinalMatchResult";
 import RoundScoreNotebook from "./components/RoundScoreNotebook";
 import "./Sevens.css";
@@ -1936,57 +1936,12 @@ useEffect(() => {
                     );
                 })}
             </section>
-
-          <section className="board">
-            {suits.map((suit) => (
-              <div className="boardRow" key={suit.id}>
-                <div
-                  className={`boardSuit ${
-                    suit.id === "hearts" || suit.id === "diamonds"
-                      ? "redSuit"
-                      : "blackSuit"
-                  }`}
-                >
-                  {suit.symbol}
-                </div>
-
-                <div className="boardCards">
-                  {Array.from({ length: 13 }, (_, index) => {
-                    const rank = index + 1;
-                    const played = board[suit.id].includes(rank);
-
-                    if (played) {
-                      return (
-                        <PlayingCard
-                          key={`${suit.id}-${rank}`}
-                          suit={suit.id}
-                          rank={rank}
-                          small
-                        />
-                      );
-                    }
-
-                    const playableSlot = isPlayable(
-                      {
-                        suit: suit.id,
-                        rank,
-                      },
-                      board,
-                    );
-
-                    return (
-                      <EmptyCardSlot
-                        key={`${suit.id}-${rank}`}
-                        suit={suit.id}
-                        rank={rank}
-                        playable={playableSlot}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </section>
+            
+          <SevensBoard
+            suits={suits}
+            board={board}
+            isPlayable={isPlayable}
+          />
 
           <section className="playerArea">
             <div
