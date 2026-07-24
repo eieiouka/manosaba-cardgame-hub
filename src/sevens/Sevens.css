@@ -900,13 +900,12 @@ body,
     アニメーション中に変更される要素を
     ブラウザへ事前通知する
   */
-  will-change: left, top, transform, opacity;
+ will-change: left, top, transform;
 
   /*
     スマホで合成レイヤーに乗りやすくする
   */
   backface-visibility: hidden;
-  transform-style: preserve-3d;
 
   /*
     二重drop-shadowは削除
@@ -932,7 +931,7 @@ body,
     clamp(3px, 0.333cqw, 5px);
 
   box-shadow:
-    0 5px 8px rgba(0, 0, 0, 0.35);
+    0 3px 4px rgba(0, 0, 0, 0.22);
 
   pointer-events: none;
   user-select: none;
