@@ -76,7 +76,7 @@ export default function useCardAnimation({
           ),
         );
       });
-    }, 700);
+    }, 710);
   };
 
   const burstPlayer = ({
