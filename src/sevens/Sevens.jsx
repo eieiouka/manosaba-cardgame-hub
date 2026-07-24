@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -11,6 +12,7 @@ import OpponentArea from "./components/OpponentArea";
 import PlayerHand from "./components/PlayerHand";
 import TurnControls from "./components/TurnControls";
 import FlyingCards from "./components/FlyingCards";
+import useOpeningAnimation from "./hooks/useOpeningAnimation";
 import FinalMatchResult from "./components/FinalMatchResult";
 import RoundScoreNotebook from "./components/RoundScoreNotebook";
 import "./Sevens.css";
@@ -380,7 +382,7 @@ function Sevens({
     });
   };
 
-  const playCardPlaySound = () => {
+  const playCardPlaySound = useCallback(() => {
     // バースト音が流れている最中だけ、カード音を鳴らさない
     if (
       burstAudioRef.current &&
@@ -396,7 +398,7 @@ function Sevens({
     audio.play().catch(() => {
       // 再生できなかった場合は何もしない
     });
-  };
+  }, []);
 
   const playBurstVoice = (playerIndex) => {
     const source = burstVoiceSources[playerIndex];
@@ -529,6 +531,21 @@ function Sevens({
     }, 1000);
   };
 
+  useOpeningAnimation({
+    openingDone,
+    openingSevens,
+    firstPlayerIndex,
+    tableRef,
+    getElementCenterRelative: getElementCenterRelativeTo,
+    playCardPlaySound,
+    setHand,
+    setCpuHands,
+    setFlyingCards,
+    setBoard,
+    setCurrentPlayerIndex,
+    setOpeningDone,
+  });
+
   useEffect(() => {
     return () => {
       if (passDelayTimerRef.current !== null) {
@@ -558,164 +575,6 @@ function Sevens({
       );
     };
   }, []);
-
-  useEffect(() => {
-    if (openingDone) {
-        return undefined;
-    }
-
-    if (!openingSevens || openingSevens.length === 0) {
-        setCurrentPlayerIndex(firstPlayerIndex);
-        setOpeningDone(true);
-        return undefined;
-    }
-
-    let cancelled = false;
-    const timers = [];
-
-    const suitOrder = {
-        spades: 0,
-        hearts: 1,
-        diamonds: 2,
-        clubs: 3,
-    };
-
-    const orderedSevens = [...openingSevens].sort(
-        (cardA, cardB) =>
-        suitOrder[cardA.suit] -
-        suitOrder[cardB.suit],
-    );
-
-    const launchInterval = 600;
-    const flightDuration = 600;
-
-    orderedSevens.forEach((card, index) => {
-        const launchTimer = window.setTimeout(() => {
-            if (cancelled) {
-                return;
-            }
-
-            const tableElement = tableRef.current;
-
-            const targetElement =
-                tableElement?.querySelector(
-                `[data-board-suit="${card.suit}"][data-board-rank="7"]`,
-                );
-
-            if (!tableElement || !targetElement) {
-                return;
-            }
-
-            const targetCenter =
-                getElementCenterRelativeTo(
-                  targetElement,
-                  tableElement,
-                );
-
-            if (!targetCenter) {
-              return;
-            }
-
-            // 自分が持っていた7なら、飛行エフェクト開始前に手札から消す
-            // 7を出した人の手札から、飛行開始前にカードを消す
-            if (card.ownerIndex === 0) {
-            setHand((currentHand) =>
-                currentHand.filter(
-                (handCard) =>
-                    handCard.suit !== card.suit ||
-                    handCard.rank !== 7
-                )
-            );
-            } else {
-            const cpuIndex = card.ownerIndex - 1;
-
-            setCpuHands((currentCpuHands) =>
-                currentCpuHands.map((cpuHand, index) => {
-                if (index !== cpuIndex) {
-                    return cpuHand;
-                }
-
-                return cpuHand.filter(
-                    (handCard) =>
-                    handCard.suit !== card.suit ||
-                    handCard.rank !== 7
-                );
-                })
-            );
-            }
-
-            const flyingCardId =
-              `opening-${card.ownerIndex}-${card.suit}-7-${index}`;
-
-            playCardPlaySound();
-
-            setFlyingCards((currentFlyingCards) => [
-              ...currentFlyingCards,
-              {
-                ...card,
-                id: flyingCardId,
-                targetLeft: targetCenter.left,
-                targetTop: targetCenter.top,
-              },
-            ]);
-        }, index * launchInterval);
-
-        const landingTimer = window.setTimeout(() => {
-        if (cancelled) {
-            return;
-        }
-
-        setBoard((currentBoard) => {
-        if (currentBoard[card.suit]?.includes(7)) {
-            return currentBoard;
-        }
-
-        return {
-            ...currentBoard,
-            [card.suit]: [
-            ...currentBoard[card.suit],
-            7,
-            ],
-        };
-        });
-
-        const flyingCardId =
-          `opening-${card.ownerIndex}-${card.suit}-7-${index}`;
-
-        setFlyingCards((currentFlyingCards) =>
-          currentFlyingCards.filter(
-            (flyingCard) => flyingCard.id !== flyingCardId,
-          ),
-        );
-        }, index * launchInterval + flightDuration);
-
-        timers.push(launchTimer, landingTimer);
-    });
-
-    const finishTimer = window.setTimeout(() => {
-        if (cancelled) {
-        return;
-        }
-
-        setFlyingCards([]);
-        setCurrentPlayerIndex(firstPlayerIndex);
-        setOpeningDone(true);
-    }, orderedSevens.length * launchInterval + 100);
-
-    timers.push(finishTimer);
-
-    return () => {
-        cancelled = true;
-
-        timers.forEach((timer) => {
-        window.clearTimeout(timer);
-        });
-    };
-    }, [
-    openingDone,
-    openingSevens,
-    firstPlayerIndex,
-    ]);
 
     useEffect(() => {
         if (!openingDone) {
