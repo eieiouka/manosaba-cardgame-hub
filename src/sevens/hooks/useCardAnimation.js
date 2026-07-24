@@ -61,15 +61,22 @@ export default function useCardAnimation({
     ]);
 
     window.setTimeout(() => {
-      setFlyingCards((currentFlyingCards) =>
-        currentFlyingCards.filter(
-          (flyingCard) =>
-            flyingCard.id !== flyingCardId,
-        ),
-      );
-
+      /*
+        先に盤面へカードを追加する。
+        盤面側のカードが描画されてから、
+        飛行カードを削除する。
+      */
       onLanding();
-    }, 600);
+
+      window.requestAnimationFrame(() => {
+        setFlyingCards((currentFlyingCards) =>
+          currentFlyingCards.filter(
+            (flyingCard) =>
+              flyingCard.id !== flyingCardId,
+          ),
+        );
+      });
+    }, 700);
   };
 
   const burstPlayer = ({
