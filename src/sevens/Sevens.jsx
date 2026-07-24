@@ -17,7 +17,15 @@ import useCardAnimation from "./hooks/useCardAnimation";
 import useRoundFlow from "./hooks/useRoundFlow";
 import usePlayerTurn from "./hooks/usePlayerTurn";
 import useBurstCheck from "./hooks/useBurstCheck";
+import useGameScale from "./hooks/useGameScale";
 import calculateRoundResult from "./utils/calculateRoundResult";
+
+import {
+  isPlayable,
+  getNextPlayerIndex,
+  getElementCenterRelativeTo,
+} from "./utils/sevensUtils";
+
 import FinalMatchResult from "./components/FinalMatchResult";
 import RoundScoreNotebook from "./components/RoundScoreNotebook";
 import "./Sevens.css";
@@ -198,71 +206,6 @@ function loadCurrentRoundNumber() {
   }
 }
 
-function isPlayable(card, board) {
-  const playedCards = board[card.suit] ?? [];
-  const playedRankSet = new Set(playedCards);
-
-  // 7がまだ置かれていない列では、7だけを出せる
-  if (!playedRankSet.has(7)) {
-    return card.rank === 7;
-  }
-
-  // バーストで離れた位置に置かれた札は無視し、
-  // 7から連続してつながっている範囲だけを調べる
-  let connectedLowest = 7;
-  let connectedHighest = 7;
-
-  while (playedRankSet.has(connectedLowest - 1)) {
-    connectedLowest -= 1;
-  }
-
-  while (playedRankSet.has(connectedHighest + 1)) {
-    connectedHighest += 1;
-  }
-
-  return (
-    card.rank === connectedLowest - 1 ||
-    card.rank === connectedHighest + 1
-  );
-}
-
-function getNextPlayerIndex(
-  currentPlayerIndex,
-  burstPlayers = [],
-) {
-  for (let offset = 1; offset <= 4; offset += 1) {
-    const nextPlayerIndex =
-      (currentPlayerIndex + offset) % 4;
-
-    if (!burstPlayers.includes(nextPlayerIndex)) {
-      return nextPlayerIndex;
-    }
-  }
-
-  return currentPlayerIndex;
-}
-
-function getElementCenterRelativeTo(element, ancestor) {
-  let left = 0;
-  let top = 0;
-  let currentElement = element;
-
-  while (currentElement && currentElement !== ancestor) {
-    left += currentElement.offsetLeft;
-    top += currentElement.offsetTop;
-    currentElement = currentElement.offsetParent;
-  }
-
-  if (currentElement !== ancestor) {
-    return null;
-  }
-
-  return {
-    left: left + element.offsetWidth / 2,
-    top: top + element.offsetHeight / 2,
-  };
-}
-
 function Sevens({
   navigate,
   hands,
@@ -296,9 +239,7 @@ function Sevens({
     3,
   ]);
 
-  const [gameScale, setGameScale] = useState(
-    calculateGameScale,
-  );
+  const gameScale = useGameScale(calculateGameScale);
 
   const [openingDone, setOpeningDone] =
     useState(false);
@@ -414,28 +355,6 @@ function Sevens({
     setWinnerIndex,
     setWinnerType,
   });
-
-  useEffect(() => {
-    const updateGameScale = () => {
-      setGameScale(calculateGameScale());
-    };
-
-    updateGameScale();
-
-    window.addEventListener("resize", updateGameScale);
-    window.visualViewport?.addEventListener(
-      "resize",
-      updateGameScale,
-    );
-
-    return () => {
-      window.removeEventListener("resize", updateGameScale);
-      window.visualViewport?.removeEventListener(
-        "resize",
-        updateGameScale,
-      );
-    };
-  }, []);
 
   const sortedHand = useMemo(() => {
     const suitOrder = {
