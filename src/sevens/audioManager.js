@@ -29,7 +29,7 @@ const championVoiceSources = [
 const cardPlaySoundSource =
   "/audio/card-play.mp3";
 
-const CARD_SOUND_POOL_SIZE = 1;
+const CARD_SOUND_POOL_SIZE = 4;
 
 function createAudio(source, volume) {
   const audio = new Audio();
