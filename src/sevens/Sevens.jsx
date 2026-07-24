@@ -6,11 +6,11 @@ import {
 } from "react";
 
 import { chooseCpuAction } from "./sevensCpu";
-import PlayingCard from "./components/PlayingCard";
 import SevensBoard from "./components/SevensBoard";
 import OpponentArea from "./components/OpponentArea";
 import PlayerHand from "./components/PlayerHand";
 import TurnControls from "./components/TurnControls";
+import FlyingCards from "./components/FlyingCards";
 import FinalMatchResult from "./components/FinalMatchResult";
 import RoundScoreNotebook from "./components/RoundScoreNotebook";
 import "./Sevens.css";
@@ -27,14 +27,6 @@ const playerNames = [
   "橘シェリー",
   "遠野ハンナ",
 ];
-
-function formatScore(score) {
-  if (score > 0) {
-    return `+${score}`;
-  }
-
-  return String(score);
-}
 
 const ROUND_SCORE_STORAGE_KEY =
   "manosaba-sevens-round-scores";
@@ -133,25 +125,6 @@ const openingSourcePositions = {
   },
 };
 
-const openingTargetPositions = {
-  spades: {
-    left: "52%",
-    top: "25%",
-  },
-  hearts: {
-    left: "52%",
-    top: "39%",
-  },
-  diamonds: {
-    left: "52%",
-    top: "53%",
-  },
-  clubs: {
-    left: "52%",
-    top: "67%",
-  },
-};
-
 const opponents = [
   {
     id: "player2",
@@ -216,35 +189,6 @@ function loadCurrentRoundNumber() {
   } catch {
     return 1;
   }
-}
-
-function getRankFileName(rank) {
-  if (rank === 1) return "A";
-  if (rank === 10) return "T";
-  if (rank === 11) return "J";
-  if (rank === 12) return "Q";
-  if (rank === 13) return "K";
-
-  return String(rank);
-}
-
-function getCardImagePath(suitId, rank) {
-  const suit = suits.find((item) => item.id === suitId);
-
-  if (!suit) {
-    return "";
-  }
-
-  return `/cards/card_${getRankFileName(rank)}${suit.fileNumber}.png`;
-}
-
-function getRankLabel(rank) {
-  if (rank === 1) return "A";
-  if (rank === 11) return "J";
-  if (rank === 12) return "Q";
-  if (rank === 13) return "K";
-
-  return String(rank);
 }
 
 function isPlayable(card, board) {
@@ -399,52 +343,6 @@ function Sevens({
   ];
 
   const cardPlaySoundSource = "/audio/card-play.mp3";
-
-  const playAudio = ({
-    source,
-    volume = 1,
-    skipIfPlaying = false,
-  }) => {
-    if (!source) {
-      return null;
-    }
-
-    const currentAudio = activeAudioRef.current;
-
-    if (
-      skipIfPlaying &&
-      currentAudio &&
-      !currentAudio.paused &&
-      !currentAudio.ended
-    ) {
-      return null;
-    }
-
-    const audio = new Audio(source);
-    audio.volume = volume;
-
-    activeAudioRef.current = audio;
-
-    const clearActiveAudio = () => {
-      if (activeAudioRef.current === audio) {
-        activeAudioRef.current = null;
-      }
-    };
-
-    audio.addEventListener("ended", clearActiveAudio, {
-      once: true,
-    });
-
-    audio.addEventListener("error", clearActiveAudio, {
-      once: true,
-    });
-
-    audio.play().catch(() => {
-      clearActiveAudio();
-    });
-
-    return audio;
-  };
 
   const burstVoiceSources = [
     "/audio/nanoka-burst.mp3",
@@ -1847,35 +1745,10 @@ useEffect(() => {
             ref={tableRef}
             className="sevensTable"
         >
-            {flyingCards.map((flyingCard) => (
-                <div
-                    key={flyingCard.id}
-                    className="openingFlyingCard"
-                    style={{
-                    "--opening-start-left":
-                        openingSourcePositions[
-                        flyingCard.ownerIndex
-                        ]?.left ?? "50%",
-
-                    "--opening-start-top":
-                        openingSourcePositions[
-                        flyingCard.ownerIndex
-                        ]?.top ?? "50%",
-
-                    "--opening-end-left":
-                        `${flyingCard.targetLeft}px`,
-
-                    "--opening-end-top":
-                        `${flyingCard.targetTop}px`,
-                    }}
-                >
-                    <PlayingCard
-                    suit={flyingCard.suit}
-                    rank={flyingCard.rank}
-                    small
-                    />
-                </div>
-            ))}
+          <FlyingCards
+            flyingCards={flyingCards}
+            openingSourcePositions={openingSourcePositions}
+          />
 
           <OpponentArea
             opponents={opponents}
