@@ -9,6 +9,7 @@ import { chooseCpuAction } from "./sevensCpu";
 import PlayingCard from "./components/PlayingCard";
 import SevensBoard from "./components/SevensBoard";
 import OpponentArea from "./components/OpponentArea";
+import PlayerHand from "./components/PlayerHand";
 import FinalMatchResult from "./components/FinalMatchResult";
 import RoundScoreNotebook from "./components/RoundScoreNotebook";
 import "./Sevens.css";
@@ -1885,7 +1886,7 @@ useEffect(() => {
             cpuPasses={cpuPasses}
             passPopupPlayerIndex={passPopupPlayerIndex}
           />
-          
+
           <SevensBoard
             suits={suits}
             board={board}
@@ -1893,63 +1894,19 @@ useEffect(() => {
           />
 
           <section className="playerArea">
-            <div
-              className={`playerHand ${
-                burstPlayers.includes(0) ? "burstPlayerHand" : ""
-              }`}
-              data-count={sortedHand.length}
-            >
-              {burstPlayers.includes(0) && (
-                <div className="playerBurstDisplay">
-                  <span className="playerBurstTitle">
-                    バースト
-                  </span>
 
-                  <span className="playerBurstCount">
-                    <strong>{burstCardCounts[0]}</strong>
-                    <small>枚</small>
-                  </span>
-                </div>
-              )}
-
-              <div className="playerHandTrack">
-                {sortedHand.map((card, index) => {
-                  const playable =
-                    openingDone &&
-                    currentPlayerIndex === 0 &&
-                    isPlayable(card, board);
-
-                  const selected =
-                    selectedCard?.suit === card.suit &&
-                    selectedCard?.rank === card.rank;
-
-                  return (
-                    <PlayingCard
-                      key={`${card.suit}-${card.rank}`}
-                      suit={card.suit}
-                      rank={card.rank}
-                      playable={playable}
-                      selected={selected}
-                      style={{
-                        "--hand-index": index,
-                        zIndex: index + 1,
-                      }}
-                      onClick={
-                        playable
-                            ? () => {
-                                if (selected) {
-                                playCard();
-                                } else {
-                                selectCard(card);
-                                }
-                            }
-                            : undefined
-                        }
-                    />
-                  );
-                })}
-              </div>
-            </div>
+            <PlayerHand
+              sortedHand={sortedHand}
+              openingDone={openingDone}
+              currentPlayerIndex={currentPlayerIndex}
+              board={board}
+              selectedCard={selectedCard}
+              burstPlayers={burstPlayers}
+              burstCardCounts={burstCardCounts}
+              isPlayable={isPlayable}
+              onSelectCard={selectCard}
+              onPlayCard={playCard}
+            />
 
             <div
                 className={`actionButtons ${
