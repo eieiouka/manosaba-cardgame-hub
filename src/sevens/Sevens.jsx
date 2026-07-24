@@ -6,13 +6,13 @@ import {
   useState,
 } from "react";
 
-import { chooseCpuAction } from "./sevensCpu";
 import SevensBoard from "./components/SevensBoard";
 import OpponentArea from "./components/OpponentArea";
 import PlayerHand from "./components/PlayerHand";
 import TurnControls from "./components/TurnControls";
 import FlyingCards from "./components/FlyingCards";
 import useOpeningAnimation from "./hooks/useOpeningAnimation";
+import useCpuTurn from "./hooks/useCpuTurn";
 import FinalMatchResult from "./components/FinalMatchResult";
 import RoundScoreNotebook from "./components/RoundScoreNotebook";
 import "./Sevens.css";
@@ -576,216 +576,6 @@ function Sevens({
     };
   }, []);
 
-    useEffect(() => {
-        if (!openingDone) {
-            return undefined;
-        }
-
-        if (winnerIndex !== null) {
-            return undefined;
-        }
-
-        if (flyingCards.length > 0) {
-            return undefined;
-        }
-
-        if (passPopupPlayerIndex !== null) {
-            return undefined;
-        }
-
-        if (burstPlayers.includes(currentPlayerIndex)) {
-            setCurrentPlayerIndex(
-                getNextPlayerIndex(
-                currentPlayerIndex,
-                burstPlayers,
-                ),
-            );
-
-            return undefined;
-        }
-
-        if (currentPlayerIndex === 0) {
-            return undefined;
-        }
-
-        const cpuIndex = currentPlayerIndex - 1;
-
-        const cpuTimer = window.setTimeout(() => {
-            const cpuHand = cpuHands[cpuIndex];
-            const remainingPasses = cpuPasses[cpuIndex];
-
-            const hasPlayableCard = cpuHand.some((card) =>
-            isPlayable(card, board),
-            );
-
-            if (
-            remainingPasses === 0 &&
-            !hasPlayableCard &&
-            cpuHand.length > 0
-            ) {
-            burstPlayer({
-                playerIndex: currentPlayerIndex,
-                cards: cpuHand,
-            });
-
-            return;
-            }
-
-            const otherPlayerHandCounts = [];
-
-            if (!burstPlayers.includes(0)) {
-                otherPlayerHandCounts.push(hand.length);
-            }
-
-            cpuHands.forEach((otherCpuHand, otherCpuIndex) => {
-                const otherPlayerIndex = otherCpuIndex + 1;
-
-                if (
-                    otherCpuIndex !== cpuIndex &&
-                    !burstPlayers.includes(otherPlayerIndex)
-                ) {
-                    otherPlayerHandCounts.push(
-                        otherCpuHand.length,
-                    );
-                }
-            });
-
-            const action = chooseCpuAction({
-                cpuHand,
-                board,
-                remainingPasses,
-                otherPlayerHandCounts,
-            });
-
-            // CPU側の判定が古くても、実際に出す直前に
-            // 7から連続してつながっているカードかを必ず再確認する
-            const playableCpuCards = cpuHand.filter((card) =>
-                isPlayable(card, board),
-            );
-
-            let validatedAction;
-
-            if (
-                action.type === "play" &&
-                action.card &&
-                isPlayable(action.card, board)
-            ) {
-                validatedAction = action;
-            }
-            else if (
-                action.type === "pass" &&
-                remainingPasses > 0
-            ) {
-                // AIが戦略的にパスを選択した
-                validatedAction = action;
-            }
-            else if (playableCpuCards.length > 0) {
-                // 不正なカードだけ補正する
-                validatedAction = {
-                    type: "play",
-                    card: playableCpuCards[0],
-                };
-            }
-            else if (remainingPasses > 0) {
-                validatedAction = {
-                    type: "pass",
-                };
-            }
-            else {
-                validatedAction = {
-                    type: "none",
-                };
-            }
-
-            if (validatedAction.type === "play") {
-                const playedCard = validatedAction.card;
-
-                const nextCpuHand = cpuHand.filter(
-                    (card) =>
-                    card.suit !== playedCard.suit ||
-                    card.rank !== playedCard.rank,
-                );
-
-                // 飛行開始前にCPUの手札から消す
-                setCpuHands((currentCpuHands) =>
-                    currentCpuHands.map(
-                    (currentCpuHand, index) =>
-                        index === cpuIndex
-                        ? nextCpuHand
-                        : currentCpuHand,
-                    ),
-                );
-
-                animateCardToBoard({
-                    card: playedCard,
-                    ownerIndex: currentPlayerIndex,
-
-                    onLanding: () => {
-                    // 到着後に盤面へ置く
-                    setBoard((currentBoard) => ({
-                        ...currentBoard,
-                        [playedCard.suit]: [
-                        ...currentBoard[playedCard.suit],
-                        playedCard.rank,
-                        ],
-                    }));
-
-                    if (nextCpuHand.length === 0) {
-                      playFinishVoice(currentPlayerIndex);
-                      setWinnerType("finished");
-                      setWinnerIndex(currentPlayerIndex);
-                      return;
-                    }
-
-                    setCurrentPlayerIndex(
-                        getNextPlayerIndex(
-                            currentPlayerIndex,
-                            burstPlayers,
-                        ),
-                    );
-                    },
-                });
-
-                return;
-            }
-
-            if (validatedAction.type === "pass") {
-              setCpuPasses((currentCpuPasses) =>
-                currentCpuPasses.map(
-                  (remaining, index) =>
-                    index === cpuIndex
-                      ? Math.max(0, remaining - 1)
-                      : remaining,
-                ),
-              );
-
-              showPassPopupThenAdvance(currentPlayerIndex);
-              return;
-            }
-
-            setCurrentPlayerIndex(
-              getNextPlayerIndex(
-                currentPlayerIndex,
-                burstPlayers,
-              ),
-            );
-        }, 10);
-
-        return () => {
-            window.clearTimeout(cpuTimer);
-        };
-        }, [
-        openingDone,
-        currentPlayerIndex,
-        board,
-        cpuHands,
-        cpuPasses,
-        winnerIndex,
-        flyingCards,
-        burstPlayers,
-        passPopupPlayerIndex,
-    ]);
-
   const sortedHand = useMemo(() => {
     const suitOrder = {
       spades: 1,
@@ -999,6 +789,33 @@ function Sevens({
         );
     }, 600);
   };
+
+useCpuTurn({
+  openingDone,
+  currentPlayerIndex,
+  board,
+  cpuHands,
+  cpuPasses,
+  winnerIndex,
+  flyingCards,
+  burstPlayers,
+  passPopupPlayerIndex,
+  hand,
+
+  isPlayable,
+  getNextPlayerIndex,
+  burstPlayer,
+  animateCardToBoard,
+  playFinishVoice,
+  showPassPopupThenAdvance,
+
+  setCpuHands,
+  setBoard,
+  setCpuPasses,
+  setWinnerType,
+  setWinnerIndex,
+  setCurrentPlayerIndex,
+});
 
 useEffect(() => {
   if (!openingDone) {
