@@ -33,10 +33,6 @@ export default function useCardAnimation({
       return;
     }
 
-    /*
-      座標はこれまでと同じ方法で取得する。
-      開始座標・終了座標は変更しない。
-    */
     const targetCenter =
       getElementCenterRelativeTo(
         targetElement,
@@ -51,34 +47,18 @@ export default function useCardAnimation({
     const flyingCardId =
       `normal-${ownerIndex}-${card.suit}-${card.rank}-${Date.now()}`;
 
-    const nextFlyingCard = {
-      ...card,
-      id: flyingCardId,
-      ownerIndex,
-      targetLeft: targetCenter.left,
-      targetTop: targetCenter.top,
-    };
+    playCardPlaySound();
 
-    /*
-      手札を減らす更新と飛行カード追加を
-      同じフレームで処理させない。
-
-      座標はすでに取得済みなので、
-      飛び始める場所は変わらない。
-    */
-    window.requestAnimationFrame(() => {
-      setFlyingCards((currentFlyingCards) => [
-        ...currentFlyingCards,
-        nextFlyingCard,
-      ]);
-
-      /*
-        音声生成も前フレームから分離する
-      */
-      window.requestAnimationFrame(() => {
-        playCardPlaySound();
-      });
-    });
+    setFlyingCards((currentFlyingCards) => [
+      ...currentFlyingCards,
+      {
+        ...card,
+        id: flyingCardId,
+        ownerIndex,
+        targetLeft: targetCenter.left,
+        targetTop: targetCenter.top,
+      },
+    ]);
 
     window.setTimeout(() => {
       setFlyingCards((currentFlyingCards) =>
