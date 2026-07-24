@@ -135,6 +135,7 @@ function Sevens({
   openingSevens,
   firstPlayerIndex,
   onRestart,
+  audioManager,
 }) {
   const playerHand = hands[0] ?? [];
   const initialCpuHands = [
@@ -165,13 +166,6 @@ function Sevens({
   const gameScale = useGameScale(calculateGameScale);
 
   const [openingDone, setOpeningDone] =
-    useState(false);
-
-  /*
-    最初のカード効果音の準備が終わるまで、
-    開幕の7配りを開始しないための状態。
-  */
-  const [audioWarmUpDone, setAudioWarmUpDone] =
     useState(false);
 
   const [flyingCards, setFlyingCards] =
@@ -215,48 +209,14 @@ function Sevens({
   const forcePlayerActionRef = useRef(null);
 
   const {
-    warmUpAudio,
     playPassVoice,
     playCardPlaySound,
     playBurstVoice,
     playFinishVoice,
     playChampionVoice,
-  } = useAudio();
+  } = useAudio(audioManager);
 
   const tableRef = useRef(null);
-
-  /*
-    Sevens画面が表示された直後に、
-    カード効果音を無音で一度再生して準備する。
-
-    準備に失敗した場合も、
-    開幕アニメーション自体は止めない。
-  */
-  useEffect(() => {
-    let cancelled = false;
-
-    const prepareOpeningAudio = async () => {
-      try {
-        await warmUpAudio();
-      } catch {
-        // 音声準備に失敗してもゲームは続行する
-      }
-
-      if (!cancelled) {
-        window.setTimeout(() => {
-          if (!cancelled) {
-            setAudioWarmUpDone(true);
-          }
-        }, 500);
-      }
-    };
-
-    prepareOpeningAudio();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [warmUpAudio]);
 
   const showPassPopupThenAdvance = (playerIndex) => {
     if (passDelayTimerRef.current !== null) {
@@ -281,15 +241,7 @@ function Sevens({
   };
 
   useOpeningAnimation({
-    /*
-      音声準備中はopeningDoneを一時的にtrue扱いにし、
-      useOpeningAnimationの開始を止める。
-
-      準備完了後にfalseへ変わるため、
-      その時点で開幕アニメーションが始まる。
-    */
-    openingDone:
-      openingDone || !audioWarmUpDone,
+    openingDone,
     openingSevens,
     firstPlayerIndex,
     tableRef,

@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import "./StartScreen.css";
 
 const START_WIDTH = 1500;
@@ -8,6 +12,9 @@ const PAGE_PADDING = 16;
 function StartScreen({ onStart }) {
   const [screenScale, setScreenScale] =
     useState(1);
+
+  const [starting, setStarting] =
+    useState(false);
 
   useEffect(() => {
     const updateScreenScale = () => {
@@ -63,6 +70,24 @@ function StartScreen({ onStart }) {
     };
   }, []);
 
+  const handleStart = async () => {
+    if (starting) {
+      return;
+    }
+
+    setStarting(true);
+
+    try {
+      await onStart();
+    } catch {
+      /*
+        音声準備で予期しないエラーが出ても、
+        再度開始ボタンを押せるようにする。
+      */
+      setStarting(false);
+    }
+  };
+
   return (
     <main className="sevensStartPage">
       <div
@@ -90,14 +115,17 @@ function StartScreen({ onStart }) {
           <button
             type="button"
             className="sevensStartButton"
-            onClick={onStart}
+            onClick={handleStart}
+            disabled={starting}
           >
             <span className="sevensStartTitle">
               七並べ
             </span>
 
             <span className="sevensStartText">
-              ゲームスタート
+              {starting
+                ? "準備中..."
+                : "ゲームスタート"}
             </span>
           </button>
         </section>
