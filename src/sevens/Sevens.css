@@ -880,6 +880,9 @@ body,
   position: absolute;
   z-index: 100;
 
+  contain: paint;
+  isolation: isolate;
+
   /*
     開始座標は変更しない
   */
@@ -930,8 +933,7 @@ body,
   border-radius:
     clamp(3px, 0.333cqw, 5px);
 
-  box-shadow:
-    0 3px 4px rgba(0, 0, 0, 0.22);
+  box-shadow: none;
 
   pointer-events: none;
   user-select: none;
