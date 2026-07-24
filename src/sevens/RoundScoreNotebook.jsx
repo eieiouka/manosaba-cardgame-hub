@@ -6,7 +6,7 @@ import {
 } from "react";
 
 const playerNames = [
-  "ナノカ",
+  "黒部ナノカ",
   "桜羽エマ",
   "橘シェリー",
   "遠野ハンナ",
