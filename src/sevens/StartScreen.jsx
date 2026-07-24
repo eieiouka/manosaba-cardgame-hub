@@ -5,11 +5,7 @@ const START_WIDTH = 1500;
 const START_HEIGHT = 1220;
 const PAGE_PADDING = 16;
 
-function StartScreen({
-  onStart,
-  cardsLoaded,
-  loadProgress,
-}) {
+function StartScreen({ onStart }) {
   const [screenScale, setScreenScale] =
     useState(1);
 
@@ -95,16 +91,13 @@ function StartScreen({
             type="button"
             className="sevensStartButton"
             onClick={onStart}
-            disabled={!cardsLoaded}
           >
             <span className="sevensStartTitle">
               七並べ
             </span>
 
             <span className="sevensStartText">
-              {cardsLoaded
-                ? "ゲームスタート"
-                : `読み込み中 ${loadProgress}%`}
+              ゲームスタート
             </span>
           </button>
         </section>
