@@ -165,26 +165,68 @@ export default function useCardAnimation({
 
     window.setTimeout(() => {
       /*
-        先に盤面へカードを追加する。
+        バーストした全カードを盤面へ追加する。
       */
-      onLanding();
+      setBoard((currentBoard) => {
+        const nextBoard = {
+          spades: [...currentBoard.spades],
+          hearts: [...currentBoard.hearts],
+          diamonds: [...currentBoard.diamonds],
+          clubs: [...currentBoard.clubs],
+        };
+
+        cards.forEach((card) => {
+          if (
+            !nextBoard[card.suit].includes(card.rank)
+          ) {
+            nextBoard[card.suit].push(card.rank);
+          }
+        });
+
+        Object.keys(nextBoard).forEach((suit) => {
+          nextBoard[suit].sort(
+            (rankA, rankB) => rankA - rankB,
+          );
+        });
+
+        return nextBoard;
+      });
 
       /*
-        Reactが盤面を更新し、
-        ブラウザが盤面カードを描画するまで
-        飛行カードを少しだけ残す。
+        盤面側のカードが描画されてから、
+        バーストの飛行カードを削除する。
       */
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
           setFlyingCards((currentFlyingCards) =>
             currentFlyingCards.filter(
               (flyingCard) =>
-                flyingCard.id !== flyingCardId,
+                flyingCard.burstId !== burstId,
             ),
           );
         });
       });
-    }, 700);
+
+      const remainingPlayers = [0, 1, 2, 3].filter(
+        (playerIndexValue) =>
+          !nextBurstPlayers.includes(
+            playerIndexValue,
+          ),
+      );
+
+      if (remainingPlayers.length === 1) {
+        setWinnerType("survived");
+        setWinnerIndex(remainingPlayers[0]);
+        return;
+      }
+
+      setCurrentPlayerIndex(
+        getNextPlayerIndex(
+          playerIndex,
+          nextBurstPlayers,
+        ),
+      );
+    }, 720);
   };
 
   return {
