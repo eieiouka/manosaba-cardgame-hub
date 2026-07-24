@@ -46,19 +46,45 @@ function SevensGame() {
       "4",
     ];
 
-    const cardPaths = cardRanks.flatMap((rank) =>
-      cardSuits.map(
-        (suit) =>
-          `/cards/card_${rank}${suit}.png`,
-      ),
+    const cardPaths = cardRanks.flatMap(
+      (rank) =>
+        cardSuits.map(
+          (suit) =>
+            `/cards/card_${rank}${suit}.png`,
+        ),
     );
 
     let loadedCount = 0;
+    let cancelled = false;
 
-    cardPaths.forEach((path) => {
+    const preloadCard = async (path) => {
       const image = new Image();
 
-      const finishLoading = () => {
+      try {
+        image.src = path;
+
+        if (
+          typeof image.decode === "function"
+        ) {
+          await image.decode();
+        } else {
+          await new Promise(
+            (resolve, reject) => {
+              image.onload = resolve;
+              image.onerror = reject;
+            },
+          );
+        }
+      } catch (error) {
+        console.warn(
+          `カード画像の読み込みに失敗しました: ${path}`,
+          error,
+        );
+      } finally {
+        if (cancelled) {
+          return;
+        }
+
         loadedCount += 1;
 
         setLoadProgress(
@@ -74,19 +100,25 @@ function SevensGame() {
         ) {
           setCardsLoaded(true);
         }
-      };
+      }
+    };
 
-      image.onload = finishLoading;
-      image.onerror = finishLoading;
-      image.src = path;
+    cardPaths.forEach((path) => {
+      preloadCard(path);
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const setupNewGame = () => {
     const game = setupSevensGame(4);
 
     setHands(game.hands);
-    setOpeningSevens(game.openingSevens);
+    setOpeningSevens(
+      game.openingSevens,
+    );
     setFirstPlayerIndex(
       game.firstPlayerIndex,
     );
@@ -125,7 +157,9 @@ function SevensGame() {
       <Sevens
         key={gameId}
         hands={hands}
-        openingSevens={openingSevens}
+        openingSevens={
+          openingSevens
+        }
         firstPlayerIndex={
           firstPlayerIndex
         }
