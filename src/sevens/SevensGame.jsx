@@ -69,25 +69,11 @@ function SevensGame({ navigate }) {
     );
 
     /*
-      開始ボタンを押した瞬間に
-      カード音を1回だけ鳴らす。
+      ウォームアップ直後のスマホ側処理を
+      少しだけ待ってから開幕する。
     */
-    const previewAudio =
-      audioManagerRef.current
-        ?.cardPlayAudios?.[0];
-
-    if (previewAudio) {
-      previewAudio.currentTime = 0;
-
-      try {
-        await previewAudio.play();
-      } catch {
-        // 再生できなくても続行
-      }
-    }
-
     await new Promise((resolve) => {
-      window.setTimeout(resolve, 1000);
+      window.setTimeout(resolve, 300);
     });
 
     setupNewGame();
