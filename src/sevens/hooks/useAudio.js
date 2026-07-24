@@ -34,21 +34,212 @@ const championVoiceSources = [
 
 const cardPlaySoundSource = "/audio/card-play.mp3";
 
+const CARD_SOUND_POOL_SIZE = 4;
+
+function createAudio(source, volume) {
+  const audio = new Audio();
+
+  audio.preload = "auto";
+  audio.src = source;
+  audio.volume = volume;
+
+  audio.load();
+
+  return audio;
+}
+
+function resetAudio(audio) {
+  if (!audio) {
+    return;
+  }
+
+  audio.pause();
+
+  try {
+    audio.currentTime = 0;
+  } catch {
+    // 読み込み前で変更できない場合は何もしない
+  }
+}
+
+function playAudioFromStart(audio) {
+  if (!audio) {
+    return Promise.resolve();
+  }
+
+  resetAudio(audio);
+
+  const playPromise = audio.play();
+
+  if (playPromise instanceof Promise) {
+    return playPromise;
+  }
+
+  return Promise.resolve();
+}
+
 export default function useAudio() {
+  const passAudioRefs = useRef([]);
+  const burstAudioRefs = useRef([]);
+  const finishAudioRefs = useRef([]);
+  const championAudioRefs = useRef([]);
+
+  const cardPlayAudioRefs = useRef([]);
+  const cardPlayAudioIndexRef = useRef(0);
+
   const activeAudioRef = useRef(null);
   const burstAudioRef = useRef(null);
 
-  const playPassVoice = useCallback((playerIndex) => {
-    const source = passVoiceSources[playerIndex];
+  const audioReadyRef = useRef(false);
+  const warmUpPromiseRef = useRef(null);
 
-    if (!source) {
+  useEffect(() => {
+    const passAudios = passVoiceSources.map((source) =>
+      createAudio(source, 0.8),
+    );
+
+    const burstAudios = burstVoiceSources.map((source) =>
+      createAudio(source, 1),
+    );
+
+    const finishAudios = finishVoiceSources.map((source) =>
+      createAudio(source, 1),
+    );
+
+    const championAudios = championVoiceSources.map((source) =>
+      createAudio(source, 1),
+    );
+
+    /*
+      カード音は短時間に続けて鳴るため、
+      同じAudioを使い回さず4個用意する。
+    */
+    const cardPlayAudios = Array.from(
+      { length: CARD_SOUND_POOL_SIZE },
+      () => createAudio(cardPlaySoundSource, 0.65),
+    );
+
+    passAudioRefs.current = passAudios;
+    burstAudioRefs.current = burstAudios;
+    finishAudioRefs.current = finishAudios;
+    championAudioRefs.current = championAudios;
+    cardPlayAudioRefs.current = cardPlayAudios;
+
+    /*
+      canplaythroughを待つだけでは、
+      ブラウザによっては発火しないことがある。
+
+      そのため、読み込み要求だけ先に出して、
+      実際の初回再生準備はwarmUpAudioで行う。
+    */
+    const allAudios = [
+      ...passAudios,
+      ...burstAudios,
+      ...finishAudios,
+      ...championAudios,
+      ...cardPlayAudios,
+    ];
+
+    allAudios.forEach((audio) => {
+      audio.load();
+    });
+
+    return () => {
+      allAudios.forEach((audio) => {
+        resetAudio(audio);
+
+        audio.removeAttribute("src");
+        audio.load();
+      });
+
+      passAudioRefs.current = [];
+      burstAudioRefs.current = [];
+      finishAudioRefs.current = [];
+      championAudioRefs.current = [];
+      cardPlayAudioRefs.current = [];
+
+      activeAudioRef.current = null;
+      burstAudioRef.current = null;
+
+      audioReadyRef.current = false;
+      warmUpPromiseRef.current = null;
+    };
+  }, []);
+
+  /*
+    ゲーム開始操作の直後に呼び出す。
+
+    カード音を無音で一度だけ再生することで、
+    スマホ側の初回デコードを先に済ませる。
+  */
+  const warmUpAudio = useCallback(() => {
+    if (audioReadyRef.current) {
+      return Promise.resolve();
+    }
+
+    if (warmUpPromiseRef.current) {
+      return warmUpPromiseRef.current;
+    }
+
+    const cardAudios = cardPlayAudioRefs.current;
+
+    if (cardAudios.length === 0) {
+      return Promise.resolve();
+    }
+
+    const warmUpPromises = cardAudios.map((audio) => {
+      const originalVolume = audio.volume;
+      const originalMuted = audio.muted;
+
+      audio.muted = true;
+      audio.volume = 0;
+
+      resetAudio(audio);
+
+      const playPromise = audio.play();
+
+      if (!(playPromise instanceof Promise)) {
+        resetAudio(audio);
+
+        audio.muted = originalMuted;
+        audio.volume = originalVolume;
+
+        return Promise.resolve();
+      }
+
+      return playPromise
+        .then(() => {
+          resetAudio(audio);
+
+          audio.muted = originalMuted;
+          audio.volume = originalVolume;
+        })
+        .catch(() => {
+          resetAudio(audio);
+
+          audio.muted = originalMuted;
+          audio.volume = originalVolume;
+        });
+    });
+
+    warmUpPromiseRef.current = Promise.allSettled(
+      warmUpPromises,
+    ).then(() => {
+      audioReadyRef.current = true;
+      warmUpPromiseRef.current = null;
+    });
+
+    return warmUpPromiseRef.current;
+  }, []);
+
+  const playPassVoice = useCallback((playerIndex) => {
+    const audio = passAudioRefs.current[playerIndex];
+
+    if (!audio) {
       return;
     }
 
-    const audio = new Audio(source);
-    audio.volume = 0.8;
-
-    audio.play().catch(() => {
+    playAudioFromStart(audio).catch(() => {
       // 再生できなかった場合は何もしない
     });
   }, []);
@@ -56,6 +247,10 @@ export default function useAudio() {
   const playCardPlaySound = useCallback(() => {
     const burstAudio = burstAudioRef.current;
 
+    /*
+      バーストボイス再生中は、
+      カード効果音を鳴らさない。
+    */
     if (
       burstAudio &&
       !burstAudio.paused &&
@@ -64,23 +259,54 @@ export default function useAudio() {
       return;
     }
 
-    const audio = new Audio(cardPlaySoundSource);
-    audio.volume = 0.65;
+    const cardAudios = cardPlayAudioRefs.current;
 
-    audio.play().catch(() => {
+    if (cardAudios.length === 0) {
+      return;
+    }
+
+    /*
+      現在止まっているAudioを優先して使う。
+      全部再生中なら順番に再利用する。
+    */
+    const availableAudio = cardAudios.find(
+      (audio) => audio.paused || audio.ended,
+    );
+
+    let audio = availableAudio;
+
+    if (!audio) {
+      const audioIndex =
+        cardPlayAudioIndexRef.current %
+        cardAudios.length;
+
+      audio = cardAudios[audioIndex];
+
+      cardPlayAudioIndexRef.current =
+        (audioIndex + 1) %
+        cardAudios.length;
+    }
+
+    playAudioFromStart(audio).catch(() => {
       // 再生できなかった場合は何もしない
     });
   }, []);
 
   const playBurstVoice = useCallback((playerIndex) => {
-    const source = burstVoiceSources[playerIndex];
+    const audio = burstAudioRefs.current[playerIndex];
 
-    if (!source) {
+    if (!audio) {
       return;
     }
 
-    const audio = new Audio(source);
-    audio.volume = 1;
+    const previousBurstAudio = burstAudioRef.current;
+
+    if (
+      previousBurstAudio &&
+      previousBurstAudio !== audio
+    ) {
+      resetAudio(previousBurstAudio);
+    }
 
     burstAudioRef.current = audio;
 
@@ -102,20 +328,26 @@ export default function useAudio() {
       { once: true },
     );
 
-    audio.play().catch(() => {
+    playAudioFromStart(audio).catch(() => {
       clearBurstAudio();
     });
   }, []);
 
   const playFinishVoice = useCallback((playerIndex) => {
-    const source = finishVoiceSources[playerIndex];
+    const audio = finishAudioRefs.current[playerIndex];
 
-    if (!source) {
+    if (!audio) {
       return;
     }
 
-    const audio = new Audio(source);
-    audio.volume = 1;
+    const previousActiveAudio = activeAudioRef.current;
+
+    if (
+      previousActiveAudio &&
+      previousActiveAudio !== audio
+    ) {
+      resetAudio(previousActiveAudio);
+    }
 
     activeAudioRef.current = audio;
 
@@ -137,20 +369,27 @@ export default function useAudio() {
       { once: true },
     );
 
-    audio.play().catch(() => {
+    playAudioFromStart(audio).catch(() => {
       clearActiveAudio();
     });
   }, []);
 
   const playChampionVoice = useCallback((playerIndex) => {
-    const source = championVoiceSources[playerIndex];
+    const audio =
+      championAudioRefs.current[playerIndex];
 
-    if (!source) {
+    if (!audio) {
       return;
     }
 
-    const audio = new Audio(source);
-    audio.volume = 1;
+    const previousActiveAudio = activeAudioRef.current;
+
+    if (
+      previousActiveAudio &&
+      previousActiveAudio !== audio
+    ) {
+      resetAudio(previousActiveAudio);
+    }
 
     activeAudioRef.current = audio;
 
@@ -172,22 +411,13 @@ export default function useAudio() {
       { once: true },
     );
 
-    audio.play().catch(() => {
+    playAudioFromStart(audio).catch(() => {
       clearActiveAudio();
     });
   }, []);
 
-  useEffect(() => {
-    return () => {
-      activeAudioRef.current?.pause();
-      burstAudioRef.current?.pause();
-
-      activeAudioRef.current = null;
-      burstAudioRef.current = null;
-    };
-  }, []);
-
   return {
+    warmUpAudio,
     playPassVoice,
     playCardPlaySound,
     playBurstVoice,
