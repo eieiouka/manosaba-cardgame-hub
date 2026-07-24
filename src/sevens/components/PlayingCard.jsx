@@ -58,6 +58,7 @@ function PlayingCard({
   suit,
   rank,
   onClick,
+  onCardClick,
   selected = false,
   playable = false,
   small = false,
@@ -79,13 +80,23 @@ function PlayingCard({
     .filter(Boolean)
     .join(" ");
 
+  const handleClick = onCardClick
+    ? () => {
+        onCardClick(
+          suit,
+          rank,
+          selected,
+        );
+      }
+    : onClick;
+
   return (
     <button
       type="button"
       className={className}
       style={style}
-      onClick={onClick}
-      disabled={!onClick}
+      onClick={handleClick}
+      disabled={!handleClick}
       aria-label={`${suitData?.symbol ?? ""}${getRankLabel(rank)}`}
     >
       {!imageFailed ? (
@@ -129,9 +140,13 @@ function arePlayingCardPropsEqual(previousProps, nextProps) {
     previousProps.suit === nextProps.suit &&
     previousProps.rank === nextProps.rank &&
     previousProps.onClick === nextProps.onClick &&
+    previousProps.onCardClick ===
+      nextProps.onCardClick &&
     previousProps.selected === nextProps.selected &&
     previousProps.playable === nextProps.playable &&
     previousProps.small === nextProps.small &&
+    previousProps.style?.zIndex ===
+      nextProps.style?.zIndex &&
     previousProps.style?.["--hand-index"] ===
       nextProps.style?.["--hand-index"] &&
     previousProps.style?.["--opening-start-left"] ===

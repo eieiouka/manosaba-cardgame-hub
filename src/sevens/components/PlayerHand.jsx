@@ -1,3 +1,7 @@
+import {
+  memo,
+  useCallback,
+} from "react";
 import PlayingCard from "./PlayingCard";
 
 function PlayerHand({
@@ -13,6 +17,24 @@ function PlayerHand({
   onPlayCard,
 }) {
   const isBurstPlayer = burstPlayers.includes(0);
+
+  const handleCardClick = useCallback(
+    (suit, rank, selected) => {
+      if (selected) {
+        onPlayCard();
+        return;
+      }
+
+      onSelectCard({
+        suit,
+        rank,
+      });
+    },
+    [
+      onPlayCard,
+      onSelectCard,
+    ],
+  );
 
   return (
     <div
@@ -56,15 +78,9 @@ function PlayerHand({
                 "--hand-index": index,
                 zIndex: index + 1,
               }}
-              onClick={
+              onCardClick={
                 playable
-                  ? () => {
-                      if (selected) {
-                        onPlayCard();
-                      } else {
-                        onSelectCard(card);
-                      }
-                    }
+                  ? handleCardClick
                   : undefined
               }
             />
@@ -75,4 +91,4 @@ function PlayerHand({
   );
 }
 
-export default PlayerHand;
+export default memo(PlayerHand);
