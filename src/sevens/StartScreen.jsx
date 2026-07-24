@@ -5,16 +5,23 @@ const START_WIDTH = 1500;
 const START_HEIGHT = 1220;
 const PAGE_PADDING = 16;
 
-function StartScreen({ onStart }) {
-  const [screenScale, setScreenScale] = useState(1);
+function StartScreen({
+  onStart,
+  cardsLoaded,
+  loadProgress,
+}) {
+  const [screenScale, setScreenScale] =
+    useState(1);
 
   useEffect(() => {
     const updateScreenScale = () => {
       const viewportWidth =
-        window.visualViewport?.width ?? window.innerWidth;
+        window.visualViewport?.width ??
+        window.innerWidth;
 
       const viewportHeight =
-        window.visualViewport?.height ?? window.innerHeight;
+        window.visualViewport?.height ??
+        window.innerHeight;
 
       const availableWidth = Math.max(
         viewportWidth - PAGE_PADDING * 2,
@@ -37,7 +44,11 @@ function StartScreen({ onStart }) {
 
     updateScreenScale();
 
-    window.addEventListener("resize", updateScreenScale);
+    window.addEventListener(
+      "resize",
+      updateScreenScale,
+    );
+
     window.visualViewport?.addEventListener(
       "resize",
       updateScreenScale,
@@ -62,7 +73,8 @@ function StartScreen({ onStart }) {
         className="sevensStartFrame"
         style={{
           width: START_WIDTH * screenScale,
-          height: START_HEIGHT * screenScale,
+          height:
+            START_HEIGHT * screenScale,
         }}
       >
         <section
@@ -83,13 +95,16 @@ function StartScreen({ onStart }) {
             type="button"
             className="sevensStartButton"
             onClick={onStart}
+            disabled={!cardsLoaded}
           >
             <span className="sevensStartTitle">
               七並べ
             </span>
 
             <span className="sevensStartText">
-              ゲームスタート
+              {cardsLoaded
+                ? "ゲームスタート"
+                : `読み込み中 ${loadProgress}%`}
             </span>
           </button>
         </section>
