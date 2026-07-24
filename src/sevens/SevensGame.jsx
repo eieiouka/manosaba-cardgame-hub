@@ -73,7 +73,7 @@ function SevensGame({ navigate }) {
       少しだけ待ってから開幕する。
     */
     await new Promise((resolve) => {
-      window.setTimeout(resolve, 300);
+      window.setTimeout(resolve, 1500);
     });
 
     setupNewGame();
