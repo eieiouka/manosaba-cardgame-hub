@@ -171,7 +171,7 @@ function Sevens({
     useState([]);
 
   const [burstPlayers, setBurstPlayers] =
-  useState([]);
+    useState([]);
 
   const [burstCardCounts, setBurstCardCounts] =
     useState({});
@@ -180,7 +180,7 @@ function Sevens({
     useState(null);
 
   const [winnerType, setWinnerType] =
-  useState(null);
+    useState(null);
 
   const [currentRound, setCurrentRound] =
     useState(loadCurrentRoundNumber);
@@ -197,7 +197,12 @@ function Sevens({
   const roundRecordedRef = useRef(false);
 
   const [turnSeconds, setTurnSeconds] = useState(3);
-  const [passPopupPlayerIndex, setPassPopupPlayerIndex] = useState(null);
+
+  const [
+    passPopupPlayerIndex,
+    setPassPopupPlayerIndex,
+  ] = useState(null);
+
   const passDelayTimerRef = useRef(null);
   const playerTurnCountRef = useRef(0);
   const forcePlayerActionRef = useRef(null);
@@ -239,7 +244,8 @@ function Sevens({
     openingSevens,
     firstPlayerIndex,
     tableRef,
-    getElementCenterRelative: getElementCenterRelativeTo,
+    getElementCenterRelative:
+      getElementCenterRelativeTo,
     playCardPlaySound,
     setHand,
     setCpuHands,
@@ -252,7 +258,9 @@ function Sevens({
   useEffect(() => {
     return () => {
       if (passDelayTimerRef.current !== null) {
-        window.clearTimeout(passDelayTimerRef.current);
+        window.clearTimeout(
+          passDelayTimerRef.current
+        );
       }
     };
   }, []);
@@ -289,7 +297,8 @@ function Sevens({
 
     return [...hand].sort((cardA, cardB) => {
       const suitDifference =
-        suitOrder[cardA.suit] - suitOrder[cardB.suit];
+        suitOrder[cardA.suit] -
+        suitOrder[cardB.suit];
 
       if (suitDifference !== 0) {
         return suitDifference;
@@ -299,46 +308,46 @@ function Sevens({
     });
   }, [hand]);
 
-useCpuTurn({
-  openingDone,
-  currentPlayerIndex,
-  board,
-  cpuHands,
-  cpuPasses,
-  winnerIndex,
-  flyingCards,
-  burstPlayers,
-  passPopupPlayerIndex,
-  hand,
+  useCpuTurn({
+    openingDone,
+    currentPlayerIndex,
+    board,
+    cpuHands,
+    cpuPasses,
+    winnerIndex,
+    flyingCards,
+    burstPlayers,
+    passPopupPlayerIndex,
+    hand,
 
-  isPlayable,
-  getNextPlayerIndex,
-  burstPlayer,
-  animateCardToBoard,
-  playFinishVoice,
-  showPassPopupThenAdvance,
+    isPlayable,
+    getNextPlayerIndex,
+    burstPlayer,
+    animateCardToBoard,
+    playFinishVoice,
+    showPassPopupThenAdvance,
 
-  setCpuHands,
-  setBoard,
-  setCpuPasses,
-  setWinnerType,
-  setWinnerIndex,
-  setCurrentPlayerIndex,
-});
+    setCpuHands,
+    setBoard,
+    setCpuPasses,
+    setWinnerType,
+    setWinnerIndex,
+    setCurrentPlayerIndex,
+  });
 
-useBurstCheck({
-  openingDone,
-  winnerIndex,
-  flyingCards,
-  passPopupPlayerIndex,
-  currentPlayerIndex,
-  burstPlayers,
-  hand,
-  board,
-  passes,
-  isPlayable,
-  burstPlayer,
-});
+  useBurstCheck({
+    openingDone,
+    winnerIndex,
+    flyingCards,
+    passPopupPlayerIndex,
+    currentPlayerIndex,
+    burstPlayers,
+    hand,
+    board,
+    passes,
+    isPlayable,
+    burstPlayer,
+  });
 
   useEffect(() => {
     if (winnerIndex === null) {
@@ -366,7 +375,6 @@ useBurstCheck({
     });
 
     setRoundResult(nextRoundResult);
-
   }, [
     winnerIndex,
     winnerType,
@@ -438,115 +446,138 @@ useBurstCheck({
         }}
       >
         <div
-          className="sevensGameCanvas"
+          className={`sevensGameCanvas ${
+            flyingCards.length > 0
+              ? "cardAnimationRunning"
+              : ""
+          }`}
           style={{
             transform: `scale(${gameScale})`,
           }}
         >
-        <header className="sevensHeader">
-          <button
-            type="button"
-            className="backButton"
-            onClick={() => navigate("/")}
-          >
-            ← HUBへ戻る
-          </button>
+          <header className="sevensHeader">
+            <button
+              type="button"
+              className="backButton"
+              onClick={() => navigate("/")}
+            >
+              ← HUBへ戻る
+            </button>
 
-          <div className="sevensTitle">
-            <span>MANOSABA CARD GAMES</span>
-            <h1>SEVENS</h1>
-            <p>七並べ</p>
-          </div>
+            <div className="sevensTitle">
+              <span>MANOSABA CARD GAMES</span>
+              <h1>SEVENS</h1>
+              <p>七並べ</p>
+            </div>
 
-          <button
-            type="button"
-            className="restartButton"
-            onClick={restartGame}
-          >
-            やり直す
-          </button>
-        </header>
+            <button
+              type="button"
+              className="restartButton"
+              onClick={restartGame}
+            >
+              やり直す
+            </button>
+          </header>
 
-        <section
+          <section
             ref={tableRef}
             className="sevensTable"
-        >
-          <FlyingCards
-            flyingCards={flyingCards}
-            openingSourcePositions={openingSourcePositions}
-          />
+          >
+            <FlyingCards
+              flyingCards={flyingCards}
+              openingSourcePositions={
+                openingSourcePositions
+              }
+            />
 
-          <OpponentArea
-            opponents={opponents}
-            openingDone={openingDone}
-            currentPlayerIndex={currentPlayerIndex}
-            burstPlayers={burstPlayers}
-            burstCardCounts={burstCardCounts}
-            cpuHands={cpuHands}
-            cpuPasses={cpuPasses}
-            passPopupPlayerIndex={passPopupPlayerIndex}
-          />
-
-          <SevensBoard
-            suits={suits}
-            board={board}
-            isPlayable={isPlayable}
-          />
-
-          <section className="playerArea">
-
-            <PlayerHand
-              sortedHand={sortedHand}
+            <OpponentArea
+              opponents={opponents}
               openingDone={openingDone}
-              currentPlayerIndex={currentPlayerIndex}
-              board={board}
-              selectedCard={selectedCard}
+              currentPlayerIndex={
+                currentPlayerIndex
+              }
               burstPlayers={burstPlayers}
               burstCardCounts={burstCardCounts}
+              cpuHands={cpuHands}
+              cpuPasses={cpuPasses}
+              passPopupPlayerIndex={
+                passPopupPlayerIndex
+              }
+            />
+
+            <SevensBoard
+              suits={suits}
+              board={board}
               isPlayable={isPlayable}
-              onSelectCard={selectCard}
-              onPlayCard={playCard}
             />
 
-          <TurnControls
-            openingDone={openingDone}
-            currentPlayerIndex={currentPlayerIndex}
-            flyingCards={flyingCards}
-            passPopupPlayerIndex={passPopupPlayerIndex}
-            burstPlayers={burstPlayers}
-            selectedCard={selectedCard}
-            passes={passes}
-            turnSeconds={turnSeconds}
-            isFirstPlayerTurn={
-              playerTurnCountRef.current === 0
-            }
-            onPlayCard={() => playCard()}
-            onPassTurn={passTurn}
-          />
-            
+            <section className="playerArea">
+              <PlayerHand
+                sortedHand={sortedHand}
+                openingDone={openingDone}
+                currentPlayerIndex={
+                  currentPlayerIndex
+                }
+                board={board}
+                selectedCard={selectedCard}
+                burstPlayers={burstPlayers}
+                burstCardCounts={
+                  burstCardCounts
+                }
+                isPlayable={isPlayable}
+                onSelectCard={selectCard}
+                onPlayCard={playCard}
+              />
+
+              <TurnControls
+                openingDone={openingDone}
+                currentPlayerIndex={
+                  currentPlayerIndex
+                }
+                flyingCards={flyingCards}
+                passPopupPlayerIndex={
+                  passPopupPlayerIndex
+                }
+                burstPlayers={burstPlayers}
+                selectedCard={selectedCard}
+                passes={passes}
+                turnSeconds={turnSeconds}
+                isFirstPlayerTurn={
+                  playerTurnCountRef.current === 0
+                }
+                onPlayCard={() => playCard()}
+                onPassTurn={passTurn}
+              />
+            </section>
           </section>
-        </section>
 
-        {winnerIndex !== null &&
-          roundResult !== null &&
-          !finalResultVisible && (
-            <RoundScoreNotebook
-              roundNumber={currentRound}
-              savedRoundScores={savedRoundScores}
-              roundResult={roundResult}
-              onNextRound={goToNextRound}
-              onFinishMatch={showFinalResult}
-            />
-          )}
+          {winnerIndex !== null &&
+            roundResult !== null &&
+            !finalResultVisible && (
+              <RoundScoreNotebook
+                roundNumber={currentRound}
+                savedRoundScores={
+                  savedRoundScores
+                }
+                roundResult={roundResult}
+                onNextRound={goToNextRound}
+                onFinishMatch={showFinalResult}
+              />
+            )}
 
-          {finalResultVisible && roundResult !== null && (
-            <FinalMatchResult
-              savedRoundScores={savedRoundScores}
-              roundResult={roundResult}
-              onRestart={restartGame}
-              onBackToHub={() => navigate("/")}
-            />
-          )}
+          {finalResultVisible &&
+            roundResult !== null && (
+              <FinalMatchResult
+                savedRoundScores={
+                  savedRoundScores
+                }
+                roundResult={roundResult}
+                onRestart={restartGame}
+                onBackToHub={() =>
+                  navigate("/")
+                }
+              />
+            )}
         </div>
       </div>
     </main>

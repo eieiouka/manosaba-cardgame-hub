@@ -2119,3 +2119,54 @@ body,
   flex-shrink: 0;
   border-radius: 50%;
 }
+
+/* =========================================
+   カード飛行中の描画負荷軽減
+   ========================================= */
+
+/*
+  飛行中は、手札の出せるカードの
+  発光アニメーションを停止する
+*/
+.cardAnimationRunning
+.playerHand
+.playableCard {
+  animation: none;
+  filter: brightness(1.08);
+}
+
+/*
+  飛行中は、hover時のdrop-shadowも止める
+*/
+.cardAnimationRunning
+.playerHand
+.playableCard:hover {
+  filter: brightness(1.08);
+}
+
+/*
+  飛行中は、選択中カードのdrop-shadowも止める
+*/
+.cardAnimationRunning
+.playerHand
+.playableCard.selectedCard {
+  filter: brightness(1.08);
+}
+
+/*
+  飛行中は、盤面の出せる空きマスの
+  発光アニメーションを停止する
+*/
+.cardAnimationRunning
+.playableEmptySlot {
+  animation: none;
+
+  border-color: #f4d36f;
+  color: #fff4bd;
+
+  box-shadow:
+    inset 0 0 3px
+      rgba(255, 245, 190, 0.35),
+    inset 0 0 7px
+      rgba(255, 210, 70, 0.22);
+}
