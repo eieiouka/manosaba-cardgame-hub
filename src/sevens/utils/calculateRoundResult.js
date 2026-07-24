@@ -139,8 +139,17 @@ export default function calculateRoundResult({
     const rank =
       rankByPlayerIndex[playerIndex];
 
+    /*
+     * 自分の手札を出し切って上がったトップは25点。
+     * 他の全員が飛んで最後に残ったトップは20点。
+     * 2位以下は通常の順位点を使う。
+     */
     const rankBonus =
-      rankPoints[rank] ?? 0;
+      rank === 0
+        ? winnerType === "finished"
+          ? 25
+          : 20
+        : rankPoints[rank] ?? 0;
 
     const survivalBonus =
       isBurst ? 0 : 10;

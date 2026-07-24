@@ -7,6 +7,13 @@ const playerNames = [
   "遠野ハンナ",
 ];
 
+const playerIllustrations = [
+  "/result/nanoka.png",
+  "/result/ema.png",
+  "/result/sherry.png",
+  "/result/hanna.png",
+];
+
 function formatScore(score) {
   if (score > 0) {
     return `+${score}`;
@@ -175,9 +182,15 @@ function FinalMatchResult({
                 </div>
 
                 <div className="finalRankingPlayer">
-                  <span className="finalRankingPlayerNumber">
-                    {player.playerIndex + 1}
-                  </span>
+                  <img
+                    className="finalRankingPlayerIllustration"
+                    src={
+                      playerIllustrations[
+                        player.playerIndex
+                      ]
+                    }
+                    alt={player.playerName}
+                  />
 
                   <strong>
                     {player.playerName}

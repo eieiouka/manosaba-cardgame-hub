@@ -12,6 +12,13 @@ const playerNames = [
   "遠野ハンナ",
 ];
 
+const playerIllustrations = [
+  "/result/nanoka.png",
+  "/result/ema.png",
+  "/result/sherry.png",
+  "/result/hanna.png",
+];
+
 const SCORE_STEP_INTERVAL = 500;
 
 function formatScore(score) {
@@ -194,9 +201,11 @@ function RoundScoreNotebook({
                 key={playerName}
               >
                 <div className="roundNotebookPlayerName">
-                  <span className="roundNotebookPlayerNumber">
-                    {playerIndex + 1}
-                  </span>
+                  <img
+                    className="roundNotebookPlayerIllustration"
+                    src={playerIllustrations[playerIndex]}
+                    alt={playerName}
+                  />
 
                   <span>{playerName}</span>
 

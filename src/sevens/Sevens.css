@@ -2076,3 +2076,19 @@ body,
     );
   box-shadow: 0 8px 20px rgba(203, 166, 78, 0.25);
 }
+
+.roundNotebookPlayerIllustration {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.finalRankingPlayerIllustration {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
