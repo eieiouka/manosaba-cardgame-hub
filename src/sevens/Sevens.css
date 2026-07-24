@@ -884,7 +884,8 @@ body,
   isolation: isolate;
 
   /*
-    開始座標は変更しない
+    leftとtopは開始座標で固定する。
+    アニメーション中には変更しない。
   */
   left: var(--opening-start-left);
   top: var(--opening-start-top);
@@ -895,25 +896,18 @@ body,
   pointer-events: none;
 
   transform:
-    translate(-50%, -50%)
+    translate3d(-50%, -50%, 0)
     rotate(0deg)
     scale(1.08);
 
   /*
-    アニメーション中に変更される要素を
-    ブラウザへ事前通知する
+    leftとtopではなく、
+    transformだけをアニメーションする。
   */
- will-change: left, top, transform;
+  will-change: transform, opacity;
 
-  /*
-    スマホで合成レイヤーに乗りやすくする
-  */
   backface-visibility: hidden;
 
-  /*
-    二重drop-shadowは削除
-    filterはアニメーション中の負荷が大きい
-  */
   filter: none;
 
   animation:
