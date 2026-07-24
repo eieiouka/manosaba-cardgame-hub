@@ -880,12 +880,9 @@ body,
   position: absolute;
   z-index: 100;
 
-  contain: paint;
-  isolation: isolate;
-
   /*
-    leftとtopは開始座標で固定する。
-    アニメーション中には変更しない。
+    leftとtopは開始位置に固定する。
+    アニメーション中は変更しない。
   */
   left: var(--opening-start-left);
   top: var(--opening-start-top);
@@ -893,23 +890,33 @@ body,
   width: 92px;
   aspect-ratio: 2 / 3;
 
+  opacity: 0;
+
   pointer-events: none;
 
-  transform:
-    translate3d(-50%, -50%, 0)
-    rotate(0deg)
-    scale(1.08);
+  contain: paint;
+  isolation: isolate;
 
   /*
-    leftとtopではなく、
-    transformだけをアニメーションする。
+    JSX側で実際の移動量を設定するまで、
+    アニメーションは開始しない。
   */
+  animation: none;
+
+  transform:
+    translate3d(0, 0, 0)
+    translate3d(-50%, -50%, 0)
+    rotate(0deg)
+    scale(0.8);
+
   will-change: transform, opacity;
 
   backface-visibility: hidden;
 
   filter: none;
+}
 
+.openingFlyingCard.openingFlyingCardReady {
   animation:
     openingSevenFlight 700ms
     cubic-bezier(0.2, 0.7, 0.25, 1)
@@ -937,13 +944,11 @@ body,
 
 @keyframes openingSevenFlight {
   0% {
-    left: var(--opening-start-left);
-    top: var(--opening-start-top);
-
     opacity: 0;
 
     transform:
-      translate(-50%, -50%)
+      translate3d(0, 0, 0)
+      translate3d(-50%, -50%, 0)
       rotate(0deg)
       scale(0.8);
   }
@@ -957,13 +962,15 @@ body,
   }
 
   100% {
-    left: var(--opening-end-left);
-    top: var(--opening-end-top);
-
     opacity: 0.96;
 
     transform:
-      translate(-50%, -50%)
+      translate3d(
+        var(--opening-move-x),
+        var(--opening-move-y),
+        0
+      )
+      translate3d(-50%, -50%, 0)
       rotate(360deg)
       scale(1);
   }
