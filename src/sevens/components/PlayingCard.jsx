@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 
 const suits = [
   {
@@ -124,4 +124,28 @@ function PlayingCard({
   );
 }
 
-export default PlayingCard;
+function arePlayingCardPropsEqual(previousProps, nextProps) {
+  return (
+    previousProps.suit === nextProps.suit &&
+    previousProps.rank === nextProps.rank &&
+    previousProps.onClick === nextProps.onClick &&
+    previousProps.selected === nextProps.selected &&
+    previousProps.playable === nextProps.playable &&
+    previousProps.small === nextProps.small &&
+    previousProps.style?.["--hand-index"] ===
+      nextProps.style?.["--hand-index"] &&
+    previousProps.style?.["--opening-start-left"] ===
+      nextProps.style?.["--opening-start-left"] &&
+    previousProps.style?.["--opening-start-top"] ===
+      nextProps.style?.["--opening-start-top"] &&
+    previousProps.style?.["--opening-end-left"] ===
+      nextProps.style?.["--opening-end-left"] &&
+    previousProps.style?.["--opening-end-top"] ===
+      nextProps.style?.["--opening-end-top"]
+  );
+}
+
+export default memo(
+  PlayingCard,
+  arePlayingCardPropsEqual,
+);
