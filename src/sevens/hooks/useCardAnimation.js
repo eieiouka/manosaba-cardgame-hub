@@ -69,12 +69,14 @@ export default function useCardAnimation({
       onLanding();
 
       window.requestAnimationFrame(() => {
-        setFlyingCards((currentFlyingCards) =>
-          currentFlyingCards.filter(
-            (flyingCard) =>
-              flyingCard.id !== flyingCardId,
-          ),
-        );
+        window.requestAnimationFrame(() => {
+          setFlyingCards((currentFlyingCards) =>
+            currentFlyingCards.filter(
+              (flyingCard) =>
+                flyingCard.id !== flyingCardId,
+            ),
+          );
+        });
       });
     }, 720);
   };
