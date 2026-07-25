@@ -205,8 +205,15 @@ function FinalMatchResult({
                     alt={player.playerName}
                   />
 
-                  <strong>
-                    {player.playerName}
+                  <strong className="finalRankingPlayerName">
+                    {player.playerIndex === 0 ? (
+                      <>
+                        <span>黒部ナノカ</span>
+                        <small>（You）</small>
+                      </>
+                    ) : (
+                      <span>{player.playerName}</span>
+                    )}
                   </strong>
                 </div>
 

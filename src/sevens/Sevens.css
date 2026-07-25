@@ -2882,6 +2882,242 @@ body,
     font-size: 3.5cqw;
   }
 
+  .finalRanking {
+    width: 100%;
+    gap: 2.8vw;
+  }
+
+  .finalRankingRow {
+    width: 100%;
+    min-width: 0;
+    min-height: 23vw;
+
+    grid-template-columns:
+      clamp(52px, 16vw, 72px)
+      minmax(0, 1fr);
+
+    grid-template-rows:
+      auto
+      auto;
+
+    align-items: center;
+
+    padding:
+      3vw
+      2.5vw;
+
+    overflow: hidden;
+  }
+
+  .finalRankingPosition {
+    grid-column: 1;
+    grid-row: 1 / 3;
+
+    justify-content: flex-start;
+    align-self: center;
+  }
+
+  .finalRankingPosition span {
+    font-size: clamp(30px, 9vw, 42px);
+  }
+
+  .finalRankingPosition small {
+    margin-left: 1vw;
+    font-size: clamp(13px, 3.8vw, 16px);
+  }
+
+  .finalRankingPlayer {
+    grid-column: 2;
+    grid-row: 1;
+
+    width: 100%;
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns:
+      clamp(34px, 10vw, 44px)
+      minmax(0, 1fr);
+
+    align-items: center;
+    gap: 2vw;
+
+    font-size: clamp(17px, 5.2vw, 24px);
+    line-height: 1.1;
+  }
+
+  .finalRankingPlayerIllustration {
+    width: clamp(34px, 10vw, 44px);
+    height: clamp(34px, 10vw, 44px);
+    flex: 0 0 auto;
+  }
+
+  .finalRankingPlayer strong {
+    min-width: 0;
+
+    white-space: nowrap;
+    word-break: keep-all;
+  }
+
+  .finalRankingScore {
+    grid-column: 2;
+    grid-row: 2;
+
+    margin-top: 1.2vw;
+    padding-left: calc(clamp(34px, 10vw, 44px) + 3vw);
+
+    text-align: left;
+
+    font-size: clamp(19px, 5.5vw, 25px);
+    line-height: 1;
+  }
+
+  .finalRankingScore small {
+    margin-left: 1vw;
+    font-size: 0.58em;
+  }
+
+  .finalRanking {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    gap: 2.8vw;
+  }
+
+  .finalRankingRow {
+    width: 100%;
+    min-width: 0;
+    min-height: 23vw;
+
+    grid-template-columns:
+      clamp(58px, 18vw, 78px)
+      minmax(0, 1fr);
+
+    grid-template-rows:
+      auto
+      auto;
+
+    align-items: center;
+
+    padding:
+      3vw
+      3.5vw;
+  }
+
+  .finalRankingPosition {
+    grid-column: 1;
+    grid-row: 1 / 3;
+
+    justify-content: center;
+    align-self: center;
+  }
+
+  .finalRankingPosition span {
+    font-size: clamp(30px, 9vw, 42px);
+  }
+
+  .finalRankingPosition small {
+    margin-left: 1vw;
+    font-size: clamp(13px, 3.7vw, 16px);
+  }
+
+  .finalRankingPlayer {
+    grid-column: 2;
+    grid-row: 1;
+
+    width: 100%;
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns:
+      clamp(38px, 11vw, 46px)
+      minmax(0, 1fr);
+
+    align-items: center;
+    gap: 3vw;
+
+    font-size: clamp(19px, 5.8vw, 26px);
+    line-height: 1.1;
+  }
+
+  .finalRankingPlayerIllustration {
+    width: clamp(38px, 11vw, 46px);
+    height: clamp(38px, 11vw, 46px);
+  }
+
+  .finalRankingPlayerName {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    line-height: 1.15;
+  }
+
+  .finalRankingPlayerName > span {
+    display: block;
+    width: 100%;
+
+    text-align: center;
+    white-space: nowrap;
+    word-break: keep-all;
+  }
+
+  .finalRankingPlayerName > small {
+    display: block;
+
+    margin-top: 1vw;
+
+    font-size: 0.68em;
+    font-weight: 900;
+    line-height: 1;
+
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .finalRankingScore {
+    grid-column: 2;
+    grid-row: 2;
+
+    width: 100%;
+
+    margin-top: 1.5vw;
+    padding-left:
+      calc(clamp(38px, 11vw, 46px) + 3vw);
+
+    text-align: center;
+
+    font-size: clamp(19px, 5.5vw, 25px);
+    line-height: 1;
+  }
+
+  .finalRankingScore small {
+    margin-left: 1vw;
+    font-size: 0.6em;
+  }
+
+  .finalResultOverlay {
+    padding: 3vw;
+  }
+
+  .finalResultPanel {
+    width: 100%;
+    max-width: none;
+
+    padding:
+      6vw
+      2.5vw
+      7vw;
+
+    border-width: 2px;
+    border-radius: 6vw;
+
+    overflow-x: hidden;
+  }
+
   .finalChampionName {
     width: 100%;
 
