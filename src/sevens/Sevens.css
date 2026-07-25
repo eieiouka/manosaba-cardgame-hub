@@ -3161,6 +3161,37 @@ body,
     white-space: nowrap;
   }
 
+  .finalRoundHistory {
+    display: none;
+  }
+
+  .finalResultFooter {
+    width: 100%;
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, 1fr);
+
+    gap: 3vw;
+    margin-top: 7vw;
+  }
+
+  .finalResultFooter button {
+    width: 100%;
+    min-width: 0;
+    min-height: clamp(48px, 14vw, 58px);
+
+    padding:
+      0
+      2vw;
+
+    font-size: clamp(14px, 4.2vw, 18px);
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
   /* 飛行カードも画面幅に比例 */
   .openingFlyingCard {
     width: 6.3cqw;
