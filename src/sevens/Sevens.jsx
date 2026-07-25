@@ -444,6 +444,18 @@ function Sevens({
     roundRecordedRef,
   });
 
+  const handleBackToHub = () => {
+    window.sessionStorage.removeItem(
+      ROUND_SCORE_STORAGE_KEY,
+    );
+
+    window.sessionStorage.removeItem(
+      ROUND_NUMBER_STORAGE_KEY,
+    );
+
+    navigate("/");
+  };
+
   const {
     selectCard,
     playCard,
@@ -519,7 +531,7 @@ function Sevens({
             <button
               type="button"
               className="backButton"
-              onClick={() => navigate("/")}
+              onClick={handleBackToHub}
             >
               ← HUBへ戻る
             </button>
@@ -633,9 +645,7 @@ function Sevens({
                 }
                 roundResult={roundResult}
                 onRestart={restartGame}
-                onBackToHub={() =>
-                  navigate("/")
-                }
+                onBackToHub={handleBackToHub}
               />
             )}
         </div>
