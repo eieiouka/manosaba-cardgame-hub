@@ -2727,7 +2727,7 @@ body,
 
     padding: 1.5cqw 0.5cqw;
 
-    font-size: 2.8cqw;
+    font-size: clamp(14px, 2.8cqw, 18px);
     line-height: 1.15;
     text-align: center;
   }
@@ -2766,7 +2766,7 @@ body,
     margin: 0;
     padding: 0.45cqw 1cqw;
 
-    font-size: 2.2cqw;
+    font-size: clamp(11px, 2.2cqw, 14px);
     line-height: 1;
     white-space: nowrap;
   }
@@ -2790,7 +2790,8 @@ body,
 
   .roundNotebookScoreCell,
   .roundNotebookTotalCell {
-    font-size: 4.5cqw;
+    font-size: clamp(18px, 4.5cqw, 26px);
+    font-weight: 700;
   }
 
   .roundNotebookTotalCell {
@@ -2825,7 +2826,8 @@ body,
   }
 
   .roundScoreStepValues {
-    font-size: 3.8cqw;
+    font-size: clamp(18px, 3.8cqw, 24px);
+    font-weight: 700;
   }
 
   .roundNotebookFooter {
