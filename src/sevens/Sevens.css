@@ -1396,6 +1396,19 @@ body,
   font-weight: 700;
 }
 
+.roundNotebookRuleRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5cqw 1.2cqw;
+}
+
+.roundNotebookRuleDivider {
+  width: 1px;
+  align-self: stretch;
+
+  background: rgba(90, 70, 45, 0.45);
+}
+
 .roundNotebookTable {
   display: grid;
 
@@ -2668,14 +2681,22 @@ body,
     line-height: 1.5;
   }
 
-  .roundNotebookTable {
+  .roundNotebookRuleRow {
+    justify-content: flex-start;
+    gap: 2cqw;
+
     width: 100%;
+  }
+
+  .roundNotebookTable {
+    width: calc(100% + 1cqw);
     min-width: 0;
+    margin-left: -0.5cqw;
 
     grid-template-columns:
-      17cqw
+      15cqw
       repeat(7, minmax(0, 1fr))
-      11cqw;
+      10cqw;
 
     overflow: hidden;
   }

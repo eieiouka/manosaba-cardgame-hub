@@ -156,12 +156,18 @@ function RoundScoreNotebook({
           </div>
 
           <div className="roundNotebookRule">
-            <span>1位 +20</span>
-            <span>2位 +10</span>
-            <span>3位 +5</span>
-            <span>4位 +0</span>
-            <span>生存 +10</span>
-            <span>手札 -1／枚</span>
+            <div className="roundNotebookRuleRow">
+              <span>1位 +20</span>
+              <span>2位 +10</span>
+              <span>3位 +5</span>
+              <span>4位 +0</span>
+            </div>
+
+            <div className="roundNotebookRuleRow">
+              <span>あがり +5</span>
+              <span>生存 +10</span>
+              <span>手札 -1／枚</span>
+            </div>
           </div>
         </header>
 
