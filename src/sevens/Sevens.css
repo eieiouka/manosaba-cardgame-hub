@@ -2882,6 +2882,14 @@ body,
     font-size: 3.5cqw;
   }
 
+  .finalChampionName {
+    width: 100%;
+
+    font-size: clamp(24px, 8vw, 34px);
+    line-height: 1.15;
+    text-align: center;
+  }
+
   .finalChampionNamePlayer {
     display: inline;
   }
@@ -2889,7 +2897,7 @@ body,
   .youLabel {
     display: block;
 
-    margin-top: 4px;
+    margin-top: 1.2vw;
 
     text-align: center;
 
