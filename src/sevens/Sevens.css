@@ -2936,10 +2936,13 @@ body,
     display: grid;
     grid-template-columns:
       clamp(34px, 10vw, 44px)
-      minmax(0, 1fr);
+      minmax(0, auto);
 
+    justify-content: end;
     align-items: center;
-    gap: 2vw;
+    column-gap: 2.5vw;
+
+    padding-right: 4vw;
 
     font-size: clamp(17px, 5.2vw, 24px);
     line-height: 1.1;
@@ -2948,7 +2951,10 @@ body,
   .finalRankingPlayerIllustration {
     width: clamp(34px, 10vw, 44px);
     height: clamp(34px, 10vw, 44px);
-    flex: 0 0 auto;
+
+    object-fit: cover;
+    flex-shrink: 0;
+    border-radius: 50%;
   }
 
   .finalRankingPlayer strong {
@@ -2962,10 +2968,12 @@ body,
     grid-column: 2;
     grid-row: 2;
 
-    margin-top: 1.2vw;
-    padding-left: calc(clamp(34px, 10vw, 44px) + 3vw);
+    width: 100%;
 
-    text-align: left;
+    margin-top: 1.5vw;
+    padding-right: 4vw;
+
+    text-align: right;
 
     font-size: clamp(19px, 5.5vw, 25px);
     line-height: 1;
@@ -3027,21 +3035,27 @@ body,
     width: 100%;
     min-width: 0;
 
-    display: grid;
-    grid-template-columns:
-      clamp(38px, 11vw, 46px)
-      minmax(0, 1fr);
-
+    display: flex;
     align-items: center;
-    gap: 3vw;
+    justify-content: center;
+    gap: clamp(8px, 2.5vw, 12px);
 
-    font-size: clamp(19px, 5.8vw, 26px);
+    padding: 0;
+
+    font-size: clamp(17px, 5.2vw, 24px);
     line-height: 1.1;
   }
 
   .finalRankingPlayerIllustration {
-    width: clamp(38px, 11vw, 46px);
-    height: clamp(38px, 11vw, 46px);
+    width: clamp(34px, 10vw, 44px);
+    height: clamp(34px, 10vw, 44px);
+    flex: 0 0 auto;
+
+    object-fit: cover;
+    border-radius: 50%;
+
+    margin: 0;
+    transform: none;
   }
 
   .finalRankingPlayerName {
@@ -3085,8 +3099,7 @@ body,
     width: 100%;
 
     margin-top: 1.5vw;
-    padding-left:
-      calc(clamp(38px, 11vw, 46px) + 3vw);
+    padding: 0;
 
     text-align: center;
 
