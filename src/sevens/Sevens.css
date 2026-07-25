@@ -1610,11 +1610,6 @@ body,
 
   opacity: 0;
 
-  border-bottom:
-    0.07cqw
-    dashed
-    rgba(72, 59, 40, 0.36);
-
   transform: translateX(1.7cqw);
 
   transition:
@@ -2654,15 +2649,7 @@ body,
       4cqw
       2cqw;
 
-    background:
-      repeating-linear-gradient(
-        to bottom,
-        transparent 0,
-        transparent 8.7cqw,
-        rgba(103, 137, 164, 0.2) 8.9cqw,
-        rgba(103, 137, 164, 0.2) 9cqw
-      ),
-      #f4eedc;
+    background: #f4eedc;
   }
 
   .roundNotebookBinding {
