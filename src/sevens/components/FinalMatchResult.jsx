@@ -150,12 +150,25 @@ function FinalMatchResult({
           </span>
 
           <strong className="finalChampionName">
-            {championPlayers
-              .map(
-                (player) =>
-                  player.playerName,
-              )
-              .join("・")}
+            {championPlayers.map((player, index) => (
+              <span
+                key={player.playerIndex}
+                className="finalChampionNamePlayer"
+              >
+                {index > 0 && "・"}
+
+                {player.playerIndex === 0 ? (
+                  <>
+                    黒部ナノカ
+                    <span className="youLabel">
+                      （You）
+                    </span>
+                  </>
+                ) : (
+                  player.playerName
+                )}
+              </span>
+            ))}
           </strong>
 
           <span className="finalChampionScore">

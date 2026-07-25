@@ -1932,6 +1932,14 @@ body,
   letter-spacing: 0.08em;
 }
 
+.finalChampionNamePlayer {
+  display: inline;
+}
+
+.youLabel {
+  display: inline;
+}
+
 .finalChampionScore {
   margin-top: 4px;
   color: #f3d77f;
@@ -2513,6 +2521,13 @@ body,
     box-shadow: 0 0 6px rgba(255, 45, 60, 0.8);
   }
 
+  .opponent.currentOpponent {
+    box-shadow:
+      0 0 0 1.5px rgba(255, 45, 60, 0.8),
+      0 0 10px rgba(255, 35, 50, 0.9),
+      0 8px 18px rgba(0, 0, 0, 0.22);
+  }
+
   /* =========================
      操作ボタン
      手札の下へ通常フローで配置
@@ -2865,6 +2880,28 @@ body,
     border-radius: 1.8cqw;
 
     font-size: 3.5cqw;
+  }
+
+  .finalChampionNamePlayer {
+    display: inline;
+  }
+
+  .youLabel {
+    display: block;
+
+    margin-top: 4px;
+
+    text-align: center;
+
+    font-size: 0.55em;
+    line-height: 1;
+  }
+
+  .finalResultHeader h2 {
+    font-size: clamp(32px, 10vw, 44px);
+    line-height: 1;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
   }
 
   /* 飛行カードも画面幅に比例 */
