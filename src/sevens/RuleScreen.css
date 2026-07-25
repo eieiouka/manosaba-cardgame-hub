@@ -1,0 +1,336 @@
+.sevensRulePage {
+  min-height: 100svh;
+  padding: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: auto;
+
+  color: #f7f0dc;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(49, 82, 74, 0.96),
+      rgba(12, 26, 28, 0.99)
+    );
+
+  font-family:
+    "Noto Sans JP",
+    sans-serif;
+}
+
+.sevensRuleFrame {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.sevensRuleCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 1500px;
+  height: 1220px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transform-origin: top left;
+
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(52, 87, 74, 0.95),
+      rgba(6, 20, 22, 1)
+    );
+}
+
+.sevensRulePanel {
+  width: 1120px;
+  padding: 54px 68px 52px;
+
+  border: 3px solid #d8bd72;
+  border-radius: 34px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(25, 50, 44, 0.98),
+      rgba(8, 23, 25, 0.98)
+    );
+
+  box-shadow:
+    0 0 0 8px rgba(216, 189, 114, 0.1),
+    0 30px 80px rgba(0, 0, 0, 0.6),
+    inset 0 0 50px
+      rgba(255, 230, 160, 0.05);
+}
+
+.sevensRuleHeader {
+  text-align: center;
+}
+
+.sevensRuleHeader > span {
+  display: block;
+
+  color: #d8bd72;
+
+  font-family:
+    "Cormorant Garamond",
+    serif;
+
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+}
+
+.sevensRuleHeader h1 {
+  margin: 8px 0 0;
+
+  font-family:
+    "Cormorant Garamond",
+    serif;
+
+  font-size: 58px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+.sevensRuleHeader p {
+  margin: 18px 0 0;
+
+  color: rgba(247, 240, 220, 0.72);
+
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.sevensRuleList {
+  margin-top: 42px;
+
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 18px;
+}
+
+.sevensRuleItem {
+  min-height: 150px;
+  padding: 22px 24px;
+
+  display: grid;
+  grid-template-columns:
+    56px
+    minmax(0, 1fr);
+
+  align-items: start;
+  gap: 18px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.14);
+
+  border-radius: 20px;
+
+  background:
+    rgba(255, 255, 255, 0.055);
+}
+
+.sevensRuleItem:last-child {
+  grid-column: 1 / 3;
+}
+
+.sevensRuleItem > strong {
+  width: 52px;
+  height: 52px;
+
+  display: grid;
+  place-items: center;
+
+  border:
+    2px solid
+    rgba(235, 205, 118, 0.8);
+
+  border-radius: 50%;
+
+  color: #ead078;
+
+  font-family:
+    "Cormorant Garamond",
+    serif;
+
+  font-size: 34px;
+  line-height: 1;
+}
+
+.sevensRuleItem h2 {
+  margin: 0;
+
+  color: #fff8e7;
+
+  font-size: 23px;
+  line-height: 1.25;
+}
+
+.sevensRuleItem p {
+  margin: 10px 0 0;
+
+  color: rgba(247, 240, 220, 0.72);
+
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.65;
+}
+
+.sevensRuleConfirmButton {
+  display: block;
+
+  width: 280px;
+  min-height: 68px;
+
+  margin: 38px auto 0;
+
+  border: 2px solid #efd780;
+  border-radius: 999px;
+
+  color: #172522;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f3dc8d,
+      #cba64e
+    );
+
+  font-size: 23px;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 10px 24px
+    rgba(203, 166, 78, 0.28);
+
+  transition:
+    transform 150ms ease,
+    filter 150ms ease;
+}
+
+.sevensRuleConfirmButton:hover:not(
+  :disabled
+) {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.sevensRuleConfirmButton:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+@media (max-width: 600px) {
+  .sevensRulePage {
+    padding: 10px;
+  }
+
+  .sevensRulePanel {
+    width: calc(100% - 32px);
+    min-height: calc(100% - 32px);
+
+    padding:
+        48px
+        42px
+        46px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    border-radius: 42px;
+    }
+
+  .sevensRuleHeader > span {
+    font-size: 30px;
+  }
+
+  .sevensRuleHeader h1 {
+    margin-top: 12px;
+
+    font-size: 78px;
+  }
+
+  .sevensRuleHeader p {
+    margin-top: 24px;
+
+    font-size: 32px;
+    line-height: 1.5;
+  }
+
+  .sevensRuleList {
+    flex: 1 1 auto;
+
+    margin-top: 36px;
+
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr);
+    grid-template-rows:
+        repeat(5, minmax(0, 1fr));
+
+    gap: 16px;
+    }
+
+    .sevensRuleItem,
+    .sevensRuleItem:last-child {
+    grid-column: auto;
+
+    min-height: 0;
+
+    grid-template-columns:
+        72px
+        minmax(0, 1fr);
+
+    align-items: center;
+    gap: 22px;
+
+    padding:
+        20px
+        30px;
+
+    border-radius: 28px;
+    }
+
+  .sevensRuleItem > strong {
+    width: 82px;
+    height: 82px;
+
+    font-size: 52px;
+  }
+
+  .sevensRuleItem h2 {
+    font-size: 42px;
+    line-height: 1.2;
+  }
+
+  .sevensRuleItem p {
+    margin-top: 14px;
+
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .sevensRuleConfirmButton {
+    width: min(440px, 70%);
+    min-height: 88px;
+
+    margin-top: 28px;
+
+    font-size: 36px;
+  }
+}

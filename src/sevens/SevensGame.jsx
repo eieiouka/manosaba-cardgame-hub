@@ -4,6 +4,7 @@ import {
 } from "react";
 
 import StartScreen from "./StartScreen";
+import RuleScreen from "./RuleScreen";
 import Sevens from "./Sevens";
 import { setupSevensGame } from "./sevensLogic";
 
@@ -13,24 +14,30 @@ import {
 } from "./audioManager";
 
 function SevensGame({ navigate }) {
-  const [phase, setPhase] = useState("start");
+  const [phase, setPhase] =
+    useState("start");
 
   const [hands, setHands] = useState([]);
-  const [openingSevens, setOpeningSevens] =
-    useState([]);
+
+  const [
+    openingSevens,
+    setOpeningSevens,
+  ] = useState([]);
 
   const [
     firstPlayerIndex,
     setFirstPlayerIndex,
   ] = useState(0);
 
-  const [gameId, setGameId] = useState(0);
+  const [gameId, setGameId] =
+    useState(0);
 
   /*
     SevensGameが存在している間、
     同じAudioオブジェクトを保持する。
 
-    StartScreenからSevensへ移動しても、
+    StartScreenからRuleScreen、
+    RuleScreenからSevensへ移動しても、
     Audioは作り直されない。
   */
   const audioManagerRef = useRef(null);
@@ -59,9 +66,22 @@ function SevensGame({ navigate }) {
     );
   };
 
-  const handleStart = async () => {
+  /*
+    開始画面のゲームスタートでは
+    まだゲームを生成せず、
+    ルール説明画面へ移動する。
+  */
+  const handleOpenRules = () => {
+    setPhase("rules");
+  };
+
+  /*
+    ルール画面のOKボタンを押した時に、
+    音声準備とゲーム生成を行う。
+  */
+  const handleConfirmRules = async () => {
     /*
-      開始ボタンのクリック操作中に
+      OKボタンのクリック操作中に
       カード音を無音再生してデコードする。
     */
     await warmUpSevensAudio(
@@ -84,6 +104,10 @@ function SevensGame({ navigate }) {
     /*
       音声は作り直さない。
       同じaudioManagerを使い続ける。
+
+      2回目以降のゲームでは
+      ルール説明を再表示せず、
+      そのまま新しいゲームを始める。
     */
     setupNewGame();
   };
@@ -91,7 +115,17 @@ function SevensGame({ navigate }) {
   if (phase === "start") {
     return (
       <StartScreen
-        onStart={handleStart}
+        onStart={handleOpenRules}
+      />
+    );
+  }
+
+  if (phase === "rules") {
+    return (
+      <RuleScreen
+        onConfirm={
+          handleConfirmRules
+        }
       />
     );
   }
