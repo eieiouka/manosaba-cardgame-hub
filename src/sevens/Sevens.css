@@ -2173,3 +2173,424 @@ body,
     inset 0 0 7px
       rgba(255, 210, 70, 0.22);
 }
+
+/* =========================================
+   スマホ用レイアウト
+   ========================================= */
+
+@media (max-width: 600px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+
+  .sevensPage {
+    width: 100%;
+    min-width: 0;
+    min-height: 100svh;
+
+    padding: 0;
+
+    display: block;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* スマホでは画面幅をそのままゲーム幅にする */
+  .sevensGameFrame.mobileGameFrame {
+    width: 100%;
+    height: auto;
+    min-height: 100svh;
+  }
+
+  .sevensGameCanvas.mobileGameCanvas {
+    position: relative;
+    top: auto;
+    left: auto;
+
+    width: 100%;
+    height: auto;
+    min-height: 100svh;
+
+    padding:
+      max(3cqw, env(safe-area-inset-top))
+      max(3cqw, env(safe-area-inset-right))
+      max(5cqw, env(safe-area-inset-bottom))
+      max(3cqw, env(safe-area-inset-left));
+
+    display: flex;
+    flex-direction: column;
+
+    transform: none;
+    transform-origin: top left;
+
+    container-type: inline-size;
+
+    overflow: visible;
+  }
+
+  /* =========================
+     ヘッダー
+     ========================= */
+
+  .sevensHeader {
+    width: 100%;
+    margin: 0 0 4cqw;
+
+    grid-template-columns: 1fr auto 1fr;
+    column-gap: 2cqw;
+  }
+
+  .backButton,
+  .restartButton {
+    max-width: 27cqw;
+    padding: 2.2cqw 2.5cqw;
+
+    border-radius: 2cqw;
+
+    font-size: 3.1cqw;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+
+  .sevensTitle span {
+    font-size: 2cqw;
+    letter-spacing: 0.45cqw;
+  }
+
+  .sevensTitle h1 {
+    margin-top: 0.5cqw;
+
+    font-size: 7.5cqw;
+    letter-spacing: 0.7cqw;
+    line-height: 1;
+  }
+
+  .sevensTitle p {
+    margin-top: 1cqw;
+    font-size: 3.2cqw;
+  }
+
+  /* =========================
+     ゲームテーブル全体
+     ========================= */
+
+  .sevensTable {
+    position: relative;
+
+    width: 100%;
+    min-height: 0;
+    flex: none;
+
+    margin: 0;
+    padding: 3cqw;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4cqw;
+
+    border-width: 0.45cqw;
+    border-radius: 8cqw;
+
+    overflow: visible;
+  }
+
+  /* =========================
+     CPU3人
+     ========================= */
+
+  .opponentsTopRow {
+    position: relative;
+    top: auto;
+    left: auto;
+
+    width: 100%;
+    height: auto;
+
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5cqw;
+
+    pointer-events: none;
+  }
+
+  .opponent,
+  .opponentLeft,
+  .opponentCenter,
+  .opponentRight {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+
+    width: 100%;
+    min-width: 0;
+    height: auto;
+
+    padding: 1.2cqw;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1cqw;
+
+    border-radius: 4cqw;
+
+    transform: none;
+  }
+
+  .opponentIcon {
+    width: 15cqw;
+    height: 15cqw;
+    flex: 0 0 15cqw;
+
+    border-width: 0.45cqw;
+  }
+
+  .opponentInfoRow {
+    width: 100%;
+    gap: 0.8cqw;
+  }
+
+  .opponentRemaining {
+    height: auto;
+
+    font-size: 4.4cqw;
+    text-align: center;
+  }
+
+  .opponentPasses {
+    gap: 0.3cqw;
+  }
+
+  .opponentPassIcon {
+    font-size: 2.4cqw;
+  }
+
+  .opponent .passPopup {
+    inset: 1cqw;
+
+    border-radius: 3.5cqw;
+
+    font-size: 4cqw;
+  }
+
+  /* =========================
+     盤面
+     ========================= */
+
+  .board {
+    width: 100%;
+    min-width: 0;
+
+    gap: 1cqw;
+  }
+
+  .boardRow {
+    width: 100%;
+    min-width: 0;
+
+    grid-template-columns: 6cqw minmax(0, 1fr);
+    gap: 1cqw;
+  }
+
+  .boardSuit {
+    font-size: 5.4cqw;
+  }
+
+  .boardCards {
+    width: 100%;
+    min-width: 0;
+
+    grid-template-columns:
+      repeat(13, minmax(0, 1fr));
+
+    gap: 0.45cqw;
+  }
+
+  .sevensCard,
+  .emptyCardSlot {
+    min-width: 0;
+
+    border-radius: 0.8cqw;
+  }
+
+  .emptyCardSlot,
+  .playableEmptySlot {
+    font-size: 3.2cqw;
+  }
+
+  /* =========================
+     自分の手札
+     ========================= */
+
+  .playerArea {
+    --hand-card-width: 25cqw;
+
+    position: relative;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    margin: 1cqw 0 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4cqw;
+
+    transform: none;
+  }
+
+  .playerHand {
+    width: 100%;
+    min-width: 0;
+    min-height:
+      calc(
+        var(--hand-card-width) * 1.7
+      );
+
+    margin: 0;
+
+    justify-content: center;
+
+    overflow: visible;
+  }
+
+  .playerHandTrack {
+    width:
+      calc(
+        100% - var(--hand-card-width)
+      );
+
+    height:
+      calc(
+        var(--hand-card-width) * 1.7
+      );
+
+    margin-right:
+      var(--hand-card-width);
+  }
+
+  .playerHand .sevensCard {
+    bottom: 0;
+
+    width: var(--hand-card-width);
+  }
+
+  .playerHand .sevensCard:hover {
+    transform: none;
+  }
+
+  .playerHand .selectedCard {
+    transform: translateY(-3cqw);
+  }
+
+  .playerHand .playableCard::after {
+    inset: 0px;
+    border-width: 2px;
+    box-shadow: 0 0 6px rgba(255, 45, 60, 0.8);
+  }
+
+  /* =========================
+     操作ボタン
+     手札の下へ通常フローで配置
+     ========================= */
+
+  .actionButtons {
+    position: relative;
+
+    width: 100%;
+    min-width: 0;
+
+    margin: 0;
+
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, 1fr);
+    gap: 4cqw;
+
+    align-items: stretch;
+  }
+
+  .actionButtons button {
+    width: 100%;
+    min-width: 0;
+    min-height: 18cqw;
+
+    border-radius: 3cqw;
+  }
+
+  .passButton {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .playCardButton {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .playButtonLabel {
+    margin-top: 1.5cqw;
+    font-size: 3.2cqw;
+  }
+
+  .turnCountdown {
+    font-size: 9cqw;
+  }
+
+  .turnCountdownUnit {
+    margin-bottom: 1.5cqw;
+    font-size: 2.8cqw;
+  }
+
+  .passButtonLabel {
+    top: 2.2cqw;
+    left: 2.5cqw;
+
+    font-size: 3.6cqw;
+  }
+
+  .passRemainingLabel {
+    top: 7cqw;
+    left: 2.5cqw;
+
+    font-size: 2.5cqw;
+  }
+
+  .passCount {
+    right: 3cqw;
+    bottom: 2.4cqw;
+
+    width: 9cqw;
+    height: 10cqw;
+  }
+
+  .passCount strong {
+    font-size: 9cqw;
+  }
+
+  .passCount small {
+    font-size: 2.8cqw;
+  }
+
+  .actionButtons .playerPassPopup {
+    border-radius: 3cqw;
+    font-size: 5cqw;
+  }
+
+  /* 飛行カードも画面幅に比例 */
+  .openingFlyingCard {
+    width: 6.3cqw;
+  }
+}

@@ -163,7 +163,46 @@ function Sevens({
     3,
   ]);
 
-  const gameScale = useGameScale(calculateGameScale);
+  const [isMobileLayout, setIsMobileLayout] =
+    useState(() =>
+      window.matchMedia(
+        "(max-width: 600px)",
+      ).matches,
+    );
+
+  useEffect(() => {
+    const mobileMediaQuery =
+      window.matchMedia(
+        "(max-width: 600px)",
+      );
+
+    const updateMobileLayout = () => {
+      setIsMobileLayout(
+        mobileMediaQuery.matches,
+      );
+    };
+
+    updateMobileLayout();
+
+    mobileMediaQuery.addEventListener(
+      "change",
+      updateMobileLayout,
+    );
+
+    return () => {
+      mobileMediaQuery.removeEventListener(
+        "change",
+        updateMobileLayout,
+      );
+    };
+  }, []);
+
+  const gameScale = useGameScale(
+    calculateGameScale,
+  );
+
+  const appliedGameScale =
+    isMobileLayout ? 1 : gameScale;
 
   const [openingDone, setOpeningDone] =
     useState(false);
@@ -440,21 +479,41 @@ function Sevens({
   return (
     <main className="sevensPage">
       <div
-        className="sevensGameFrame"
-        style={{
-          width: GAME_WIDTH * gameScale,
-          height: GAME_HEIGHT * gameScale,
-        }}
+        className={`sevensGameFrame ${
+          isMobileLayout
+            ? "mobileGameFrame"
+            : ""
+        }`}
+        style={
+          isMobileLayout
+            ? undefined
+            : {
+                width:
+                  GAME_WIDTH *
+                  appliedGameScale,
+                height:
+                  GAME_HEIGHT *
+                  appliedGameScale,
+              }
+        }
       >
         <div
           className={`sevensGameCanvas ${
             flyingCards.length > 0
               ? "cardAnimationRunning"
               : ""
+          } ${
+            isMobileLayout
+              ? "mobileGameCanvas"
+              : ""
           }`}
-          style={{
-            transform: `scale(${gameScale})`,
-          }}
+          style={
+            isMobileLayout
+              ? undefined
+              : {
+                  transform: `scale(${appliedGameScale})`,
+                }
+          }
         >
           <header className="sevensHeader">
             <button
