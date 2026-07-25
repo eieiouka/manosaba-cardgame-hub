@@ -2589,6 +2589,250 @@ body,
     font-size: 5cqw;
   }
 
+    /* =========================
+     スマホ版：1戦ごとのリザルト
+     ========================= */
+
+  .roundNotebookOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    padding: 5cqw 4cqw;
+
+    align-items: flex-start;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .roundNotebook {
+    width: 100%;
+    min-height: 145cqw;
+
+    margin: 6cqw auto;
+    padding:
+      7cqw
+      2cqw
+      6cqw
+      2cqw;
+
+    overflow: visible;
+
+    border-width: 0.5cqw;
+    border-radius:
+      2cqw
+      4cqw
+      4cqw
+      2cqw;
+
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 8.7cqw,
+        rgba(103, 137, 164, 0.2) 8.9cqw,
+        rgba(103, 137, 164, 0.2) 9cqw
+      ),
+      #f4eedc;
+  }
+
+  .roundNotebookBinding {
+    display: none;
+  }
+
+  .roundNotebookHeader {
+    display: block;
+
+    margin-bottom: 4cqw;
+    padding-bottom: 2cqw;
+  }
+
+  .roundNotebookSubTitle {
+    font-size: 3cqw;
+  }
+
+  .roundNotebookHeader h2 {
+    margin-top: 1cqw;
+    font-size: 6cqw;
+  }
+
+  .roundNotebookRule {
+    margin-top: 2.5cqw;
+    padding-bottom: 0;
+
+    justify-content: flex-start;
+    gap: 1.5cqw 3cqw;
+
+    font-size: 2.7cqw;
+    line-height: 1.5;
+  }
+
+  .roundNotebookTable {
+    width: 100%;
+    min-width: 0;
+
+    grid-template-columns:
+      17cqw
+      repeat(7, minmax(0, 1fr))
+      11cqw;
+
+    overflow: hidden;
+  }
+
+  .roundNotebookCorner,
+  .roundNotebookRoundHeader,
+  .roundNotebookTotalHeader,
+  .roundNotebookPlayerName,
+  .roundNotebookScoreCell,
+  .roundNotebookTotalCell {
+    min-height: 14cqw;
+  }
+
+  .roundNotebookCorner,
+  .roundNotebookRoundHeader,
+  .roundNotebookTotalHeader {
+    min-height: 8cqw;
+
+    font-size: 2.8cqw;
+  }
+
+  .roundNotebookPlayerName {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8cqw;
+
+    padding: 1.5cqw 0.5cqw;
+
+    font-size: 2.8cqw;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  .roundNotebookPlayerIllustration {
+    width: 9cqw;
+    height: 9cqw;
+    flex: 0 0 9cqw;
+
+    display: block;
+
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .roundNotebookPlayerName > span:not(
+    .roundWinnerMark
+  ):not(
+    .roundBurstMark
+  ) {
+    display: block;
+
+    max-width: 15cqw;
+
+    font-size: 2.7cqw;
+    font-weight: 900;
+    line-height: 1.15;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .roundNotebookPlayerName .roundWinnerMark,
+  .roundNotebookPlayerName .roundBurstMark {
+    display: block;
+
+    margin: 0;
+    padding: 0.45cqw 1cqw;
+
+    font-size: 2.2cqw;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .roundNotebookPlayerNumber {
+    width: 5cqw;
+    height: 5cqw;
+    flex: 0 0 5cqw;
+
+    font-size: 2.5cqw;
+  }
+
+  .roundWinnerMark,
+  .roundBurstMark {
+    padding: 0.5cqw 1cqw;
+
+    border-radius: 0.8cqw;
+
+    font-size: 2cqw;
+  }
+
+  .roundNotebookScoreCell,
+  .roundNotebookTotalCell {
+    font-size: 4.5cqw;
+  }
+
+  .roundNotebookTotalCell {
+    font-size: 5cqw;
+  }
+
+  .roundScoreBreakdown {
+    margin-top: 5cqw;
+  }
+
+  .roundScoreBreakdown h3 {
+    margin: 0 0 2.5cqw;
+
+    font-size: 4cqw;
+  }
+
+  .roundScoreBreakdownGrid {
+    gap: 1.5cqw;
+  }
+
+  .roundScoreStep {
+    grid-template-columns:
+      28cqw
+      minmax(0, 1fr);
+
+    min-height: 10cqw;
+    padding: 1cqw 2cqw;
+  }
+
+  .roundScoreStep > span {
+    font-size: 3.2cqw;
+  }
+
+  .roundScoreStepValues {
+    font-size: 3.8cqw;
+  }
+
+  .roundNotebookFooter {
+    margin-top: 5cqw;
+  }
+
+  .roundNotebookProgress {
+    gap: 1.5cqw;
+  }
+
+  .roundNotebookProgress span {
+    width: 3cqw;
+    height: 3cqw;
+
+    border-width: 0.35cqw;
+  }
+
+  .roundNotebookNextButton {
+    min-width: 29cqw;
+    min-height: 11cqw;
+
+    padding: 0 4cqw;
+
+    border-radius: 1.8cqw;
+
+    font-size: 3.5cqw;
+  }
+
   /* 飛行カードも画面幅に比例 */
   .openingFlyingCard {
     width: 6.3cqw;
