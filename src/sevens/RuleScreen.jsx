@@ -102,7 +102,9 @@ function RuleScreen({ onConfirm }) {
           <div className="sevensRulePanel">
             <header className="sevensRuleHeader">
               <span>SEVENS RULES</span>
+
               <h1>七並べの遊び方</h1>
+
               <p>
                 すべてのカードを出し切り、
                 7回戦の合計得点でトップを目指そう
@@ -128,6 +130,21 @@ function RuleScreen({ onConfirm }) {
                 <strong>2</strong>
 
                 <div>
+                  <h2>カードの出し方</h2>
+
+                  <p>
+                    カードを選択して
+                    「出す」ボタンを押すか、
+                    カードをダブルタップすると
+                    出せます。
+                  </p>
+                </div>
+              </article>
+
+              <article className="sevensRuleItem">
+                <strong>3</strong>
+
+                <div>
                   <h2>出せない時はパス</h2>
 
                   <p>
@@ -139,7 +156,7 @@ function RuleScreen({ onConfirm }) {
               </article>
 
               <article className="sevensRuleItem">
-                <strong>3</strong>
+                <strong>4</strong>
 
                 <div>
                   <h2>パスを使い切るとバースト</h2>
@@ -153,7 +170,7 @@ function RuleScreen({ onConfirm }) {
               </article>
 
               <article className="sevensRuleItem">
-                <strong>4</strong>
+                <strong>5</strong>
 
                 <div>
                   <h2>自分のターンは3秒</h2>
@@ -167,7 +184,7 @@ function RuleScreen({ onConfirm }) {
               </article>
 
               <article className="sevensRuleItem">
-                <strong>5</strong>
+                <strong>6</strong>
 
                 <div>
                   <h2>全7回戦の合計点で勝負</h2>
