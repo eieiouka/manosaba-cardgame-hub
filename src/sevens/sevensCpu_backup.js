@@ -367,6 +367,13 @@ function getCardByOrder(direction, order) {
 /**
  * 1番目と指定順番のカードを
  * 両方持っている方向を取得する。
+ *
+ * 例:
+ * targetOrder = 2
+ * → 1番目と2番目を持つ階段
+ *
+ * targetOrder = 3
+ * → 1番目と3番目を持つ一間飛び
  */
 function findLinkedCandidates(
   directions,
@@ -391,12 +398,17 @@ function findLinkedCandidates(
         side: direction.side,
         handCount: direction.cards.length,
         remaining: direction.remaining,
-      };
+        };
     });
 }
 
 /**
  * 端〇カードの候補を取得する。
+ *
+ * 条件:
+ * ・その方向の残り枚数が指定数
+ * ・CPUがその方向で持っている札は1枚だけ
+ * ・その1枚が現在出せる1番目のカード
  */
 function findEdgeCandidates(
   directions,
@@ -417,12 +429,12 @@ function findEdgeCandidates(
       return direction.cards[0].order === 1;
     })
     .map((direction) => ({
-      type: "play",
-      card: direction.cards[0].card,
-      suit: direction.suit,
-      side: direction.side,
-      handCount: direction.cards.length,
-      remaining: direction.remaining,
+        type: "play",
+        card: direction.cards[0].card,
+        suit: direction.suit,
+        side: direction.side,
+        handCount: direction.cards.length,
+        remaining: direction.remaining,
     }));
 }
 
@@ -438,6 +450,7 @@ function createRandomPlayAction(
     return null;
   }
 
+  // 自分が多く持っている方向を優先
   const maxHandCount = Math.max(
     ...candidates.map(
       (candidate) => candidate.handCount,
@@ -449,6 +462,7 @@ function createRandomPlayAction(
       candidate.handCount === maxHandCount,
   );
 
+  // 残り枚数が少ない方向を優先
   const minRemaining = Math.min(
     ...handPriority.map(
       (candidate) => candidate.remaining,
@@ -458,6 +472,16 @@ function createRandomPlayAction(
   const finalCandidates = handPriority.filter(
     (candidate) =>
       candidate.remaining === minRemaining,
+  );
+
+  console.table(
+    finalCandidates.map((candidate) => ({
+      suit: candidate.suit,
+      side: candidate.side,
+      handCount: candidate.handCount,
+      remaining: candidate.remaining,
+      card: `${candidate.card.suit}-${candidate.card.rank}`,
+    })),
   );
 
   const selected =
@@ -504,97 +528,43 @@ function logCpuHandAnalysis(handInfo) {
 }
 
 /**
- * 進化AI用に、1方向の行動候補を作る。
- */
-function createEvolvedDirectionAction({
-  direction,
-  remainingPlayerCount,
-}) {
-  const ownedOrders = direction.cards
-    .map((entry) => entry.order)
-    .sort((a, b) => a - b);
-
-  if (!ownedOrders.includes(1)) {
-    return null;
-  }
-
-  const firstCard = getCardByOrder(
-    direction,
-    1,
-  );
-
-  if (!firstCard) {
-    return null;
-  }
-
-  const key =
-    `${remainingPlayerCount}|` +
-    `${ownedOrders.join(",")}|` +
-    `${direction.remaining}`;
-
-  const score = champion.values[key];
-
-  if (!Number.isFinite(score)) {
-    return null;
-  }
-
-  return {
-    type: "play",
-    card: firstCard.card,
-    suit: direction.suit,
-    side: direction.side,
-    ownedOrders,
-    remaining: direction.remaining,
-    score,
-    key,
-  };
-}
-
-/**
- * 進化AIの候補を比較する。
- */
-function compareEvolvedActions(a, b) {
-  const scoreDifference = b.score - a.score;
-
-  if (Math.abs(scoreDifference) > 1e-9) {
-    return scoreDifference;
-  }
-
-  if (a.type !== b.type) {
-    return a.type === "play" ? -1 : 1;
-  }
-
-  if (a.type === "pass") {
-    return 0;
-  }
-
-  if (
-    b.ownedOrders.length !==
-    a.ownedOrders.length
-  ) {
-    return (
-      b.ownedOrders.length -
-      a.ownedOrders.length
-    );
-  }
-
-  if (a.remaining !== b.remaining) {
-    return a.remaining - b.remaining;
-  }
-
-  /*
-   * ここまで同じなら完全同点。
-   * スート順・左右順では固定せず、
-   * 選択時にランダムで決める。
-   */
-  return 0;
-}
-
-/**
- * 進化シミュレーションで選ばれた評価表から、
  * CPUの行動を決定する。
  *
- * 引数と戻り値は従来版と同じ。
+ * 優先順位:
+ *
+ * 1. 階段
+ *    1番目と2番目を持っている
+ *
+ * 2. 端カード
+ *    残り1枚で、その方向の手札が1枚だけ
+ *
+ * 3. 一間飛び
+ *    1番目と3番目を持っている
+ *
+ * 4. パス
+ *
+ * 5. 端2カード
+ *    残り2枚で、その方向の手札が1枚だけ
+ *
+ * 6. 二間飛び
+ *    1番目と4番目を持っている
+ *
+ * 7. 端3カード
+ *
+ * 8. 三間飛び
+ *    1番目と5番目を持っている
+ *
+ * 9. 端4カード
+ *
+ * 10. 四間飛び
+ *     1番目と6番目を持っている
+ *
+ * 11. 端5カード
+ *
+ * 12. 端6カード
+ *
+ * 同じ優先順位の候補が複数あれば、
+ * ランダムで1つ選ぶ。
  */
 export function chooseCpuAction({
   cpuHand,
@@ -615,145 +585,353 @@ export function chooseCpuAction({
     boardAnalysis,
   );
 
-  /*
-   * otherPlayerHandCountsには、
-   * 現在ゲームに残っている他プレイヤーだけが
-   * 入っている前提。
-   */
-  const remainingPlayerCount = Math.max(
-    2,
-    Math.min(
-      4,
-      (otherPlayerHandCounts?.length ?? 3) + 1,
-    ),
-  );
+  const playableCards =
+    getCpuPlayableCards(cpuHand, board);
 
-  /*
-   * 旧CPUの特例判定。
-   *
-   * 自分の手札枚数が、残っている他プレイヤー全員以下で、
-   * かつ自分の全カードが現在「1番目」のカードなら、
-   * パスの優先順位を最後にする。
-   */
-  const allDirectionCards = directions.flatMap(
-    (direction) => direction.cards,
-  );
-
-  const allHandCardsAreFirstOrder =
-    cpuHand.length > 0 &&
-    allDirectionCards.length === cpuHand.length &&
-    allDirectionCards.every(
-      (entry) => entry.order === 1,
-    );
-
-  const cpuHasNoMoreCardsThanOthers =
-    Array.isArray(otherPlayerHandCounts) &&
-    otherPlayerHandCounts.length > 0 &&
+  const hasFewestHand =
     otherPlayerHandCounts.every(
-      (handCount) =>
-        cpuHand.length <= handCount,
+      (count) => cpuHand.length <= count,
     );
 
-  const shouldPutPassLast =
-    allHandCardsAreFirstOrder &&
-    cpuHasNoMoreCardsThanOthers;
+  /*
+   * 自分の手札枚数が他の全員以下で、
+   * 手札のすべてが現在出せる場合は、
+   * 通常位置ではパスせず最後まで回す。
+   */
+  const movePassToLast =
+    hasFewestHand &&
+    playableCards.length === cpuHand.length;
 
-  const actions = directions
-    .map((direction) =>
-      createEvolvedDirectionAction({
-        direction,
-        remainingPlayerCount,
-      }),
-    )
-    .filter(Boolean);
+  const remainingPlayerCount =
+    otherPlayerHandCounts.length + 1;
+
+  console.log(
+    "CPU盤面観測",
+    boardAnalysis,
+  );
+
+  console.log(
+    "CPU手札観測",
+    handInfo,
+  );
+
+  console.log(
+    "CPU残り人数",
+    remainingPlayerCount,
+  );
+
+  logCpuHandAnalysis(handInfo);
+
+  const returnPlayAction = (
+    candidates,
+    reason,
+  ) => {
+    const action = createRandomPlayAction(
+      candidates,
+      reason,
+    );
+
+    if (!action) {
+      return null;
+    }
+
+    console.log(
+      "CPU判断",
+      action.reason,
+      action.card,
+    );
+
+    return action;
+  };
 
   /*
-   * パスが残っている場合だけ、
-   * パスも評価対象へ加える。
+   * 通常位置でパスを試す。
+   *
+   * movePassToLast が成立している場合と、
+   * パスを使い切っている場合はパスしない。
    */
-  if (remainingPasses > 0) {
-    const key =
-      `${remainingPlayerCount}|PASS`;
-
-    const baseScore = champion.values[key];
-
-    if (Number.isFinite(baseScore)) {
-      actions.push({
-        type: "pass",
-        key,
-        score: shouldPutPassLast
-          ? Number.NEGATIVE_INFINITY
-          : baseScore,
-      });
+  const tryPass = () => {
+    if (
+      movePassToLast ||
+      remainingPasses <= 0
+    ) {
+      return null;
     }
-  }
 
-  if (actions.length === 0) {
-    return {
-      type: "none",
-      reason: "行動不能",
-    };
-  }
-
-  const sortedActions = [...actions].sort(
-    compareEvolvedActions,
-  );
-
-  const bestAction = sortedActions[0];
-
-  const bestActions = sortedActions.filter(
-    (action) =>
-      compareEvolvedActions(
-        action,
-        bestAction,
-      ) === 0 &&
-      compareEvolvedActions(
-        bestAction,
-        action,
-      ) === 0,
-  );
-
-  const selected = chooseRandom(bestActions);
-
-  if (selected.type === "pass") {
     console.log(
-      "進化AI判断",
+      "CPU判断",
       "パス",
-      {
-        key: selected.key,
-        score: selected.score,
-      },
     );
 
     return {
       type: "pass",
-      reason:
-        `進化AI: パス ` +
-        `（評価 ${selected.score.toFixed(2)}）`,
+      reason: "パス",
+    };
+  };
+
+  /*
+   * 1. 階段
+   *
+   * 全人数で常に最優先。
+   */
+  const staircaseAction =
+    returnPlayAction(
+      findLinkedCandidates(
+        directions,
+        2,
+      ),
+      "階段",
+    );
+
+  if (staircaseAction) {
+    return staircaseAction;
+  }
+
+  /*
+   * 2. 端カード
+   *
+   * あと1枚で端まで到達する候補。
+   */
+  const edgeOneAction =
+    returnPlayAction(
+      findEdgeCandidates(
+        directions,
+        1,
+      ),
+      "端カード",
+    );
+
+  if (edgeOneAction) {
+    return edgeOneAction;
+  }
+
+  /*
+   * 2人残り:
+   *
+   * 階段
+   * ↓
+   * 端カード
+   * ↓
+   * パス
+   */
+  if (remainingPlayerCount === 2) {
+    const passAction = tryPass();
+
+    if (passAction) {
+      return passAction;
+    }
+  }
+
+  /*
+   * 3. 一間飛び
+   *
+   * 1番目と3番目を持っている候補。
+   */
+  const oneGapAction =
+    returnPlayAction(
+      findLinkedCandidates(
+        directions,
+        3,
+      ),
+      "一間飛び",
+    );
+
+  if (oneGapAction) {
+    return oneGapAction;
+  }
+
+  /*
+   * 3人以上残り:
+   *
+   * 階段
+   * ↓
+   * 端カード
+   * ↓
+   * 一間飛び
+   * ↓
+   * パス
+   */
+  if (remainingPlayerCount >= 3) {
+    const passAction = tryPass();
+
+    if (passAction) {
+      return passAction;
+    }
+  }
+
+  /*
+   * 4. 端2カード
+   *
+   * あと2枚で端まで到達する候補。
+   */
+  const edgeTwoAction =
+    returnPlayAction(
+      findEdgeCandidates(
+        directions,
+        2,
+      ),
+      "端2カード",
+    );
+
+  if (edgeTwoAction) {
+    return edgeTwoAction;
+  }
+
+  /*
+   * 5. 二間飛び
+   *
+   * 1番目と4番目を持っている候補。
+   */
+  const twoGapAction =
+    returnPlayAction(
+      findLinkedCandidates(
+        directions,
+        4,
+      ),
+      "二間飛び",
+    );
+
+  if (twoGapAction) {
+    return twoGapAction;
+  }
+
+  /*
+   * 6. 端3カード
+   */
+  const edgeThreeAction =
+    returnPlayAction(
+      findEdgeCandidates(
+        directions,
+        3,
+      ),
+      "端3カード",
+    );
+
+  if (edgeThreeAction) {
+    return edgeThreeAction;
+  }
+
+  /*
+   * 7. 三間飛び
+   */
+  const threeGapAction =
+    returnPlayAction(
+      findLinkedCandidates(
+        directions,
+        5,
+      ),
+      "三間飛び",
+    );
+
+  if (threeGapAction) {
+    return threeGapAction;
+  }
+
+  /*
+   * 8. 端4カード
+   */
+  const edgeFourAction =
+    returnPlayAction(
+      findEdgeCandidates(
+        directions,
+        4,
+      ),
+      "端4カード",
+    );
+
+  if (edgeFourAction) {
+    return edgeFourAction;
+  }
+
+  /*
+   * 9. 四間飛び
+   */
+  const fourGapAction =
+    returnPlayAction(
+      findLinkedCandidates(
+        directions,
+        6,
+      ),
+      "四間飛び",
+    );
+
+  if (fourGapAction) {
+    return fourGapAction;
+  }
+
+  /*
+   * 10. 端5カード
+   */
+  const edgeFiveAction =
+    returnPlayAction(
+      findEdgeCandidates(
+        directions,
+        5,
+      ),
+      "端5カード",
+    );
+
+  if (edgeFiveAction) {
+    return edgeFiveAction;
+  }
+
+  /*
+   * 11. 端6カード
+   */
+  const edgeSixAction =
+    returnPlayAction(
+      findEdgeCandidates(
+        directions,
+        6,
+      ),
+      "端6カード",
+    );
+
+  if (edgeSixAction) {
+    return edgeSixAction;
+  }
+
+  /*
+   * movePassToLast が成立している場合のみ、
+   * すべての優先候補を確認した後にパスする。
+   */
+  if (
+    movePassToLast &&
+    remainingPasses > 0
+  ) {
+    console.log(
+      "CPU判断",
+      "パス（最後）",
+    );
+
+    return {
+      type: "pass",
+      reason: "パス",
     };
   }
 
-  console.log(
-    "進化AI判断",
-    selected.card,
-    {
-      suit: selected.suit,
-      side: selected.side,
-      ownedOrders: selected.ownedOrders,
-      remaining: selected.remaining,
-      key: selected.key,
-      score: selected.score,
-    },
-  );
+  /*
+   * 最終ランダム。
+   */
+  if (playableCards.length > 0) {
+    const fallbackCard =
+      chooseRandom(playableCards);
+
+    console.log(
+      "CPU判断",
+      "最終ランダム",
+      fallbackCard,
+    );
+
+    return {
+      type: "play",
+      card: fallbackCard,
+      reason: "最終ランダム",
+    };
+  }
 
   return {
-    type: "play",
-    card: selected.card,
-    reason:
-      `進化AI: ${selected.suit} ` +
-      `${selected.side} ` +
-      `[${selected.ownedOrders.join(",")}] ` +
-      `残り${selected.remaining} ` +
-      `（評価 ${selected.score.toFixed(2)}）`,
+    type: "none",
+    reason: "行動不能",
   };
 }
