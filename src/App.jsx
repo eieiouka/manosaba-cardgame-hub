@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
 import "./App.css";
 import backgroundImage from "./assets/background.jpg";
-import SevensGame from "./sevens/SevensGame";
 
 const games = [
   {
@@ -9,36 +7,15 @@ const games = [
     suit: "♠",
     title: "SEVENS",
     japaneseTitle: "七並べ",
-    path: "/sevens",
+    url: "https://manosaba-sevens.vercel.app/",
     available: true,
   },
 ];
 
 function App() {
-  const [currentPath, setCurrentPath] = useState(
-    window.location.pathname,
-  );
-
-  useEffect(() => {
-    const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, []);
-
-  const navigate = (path) => {
-    window.history.pushState({}, "", path);
-    setCurrentPath(path);
+  const openGame = (url) => {
+    window.location.href = url;
   };
-
-  if (currentPath === "/sevens") {
-    return <SevensGame navigate={navigate} />;
-  }
 
   return (
     <main className="hub">
@@ -70,7 +47,7 @@ function App() {
               key={game.id}
               type="button"
               className="gameButton"
-              onClick={() => navigate(game.path)}
+              onClick={() => openGame(game.url)}
               disabled={!game.available}
             >
               <div className="left">
@@ -88,7 +65,9 @@ function App() {
               </div>
 
               <div className="play">
-                {game.available ? "PLAY ▶" : "COMING SOON"}
+                {game.available
+                  ? "PLAY ▶"
+                  : "COMING SOON"}
               </div>
             </button>
           ))}
