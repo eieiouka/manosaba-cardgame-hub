@@ -10,6 +10,14 @@ const games = [
     url: "https://manosaba-sevens.vercel.app/",
     available: true,
   },
+  {
+    id: "president",
+    suit: "♥",
+    title: "PRESIDENT",
+    japaneseTitle: "大富豪",
+    url: "https://manosaba-president.vercel.app/",
+    available: true,
+  },
 ];
 
 function App() {
